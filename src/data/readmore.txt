@@ -1,0 +1,5 @@
+Data ingestion and preprocessing modules:  
+- load.py       → functions for reading raw data  
+- preprocess.py → data cleaning, validation, and transformation steps  
+
+Any changes to data cleaning rules should be tracked and tested here.

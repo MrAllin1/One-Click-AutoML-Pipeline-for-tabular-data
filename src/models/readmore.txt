@@ -1,0 +1,5 @@
+Model training and inference code:  
+- tabpfn_train.py   → training workflow using TabPFNClassifier  
+- tabpfn_predict.py → inference script producing CSV predictions  
+
+Feel free to add other model implementations here, following the same train/predict pattern.
