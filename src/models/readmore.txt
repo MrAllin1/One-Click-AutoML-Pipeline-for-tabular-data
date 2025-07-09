@@ -3,3 +3,15 @@ Model training and inference code:
 - tabpfn_predict.py → inference script producing CSV predictions  
 
 Feel free to add other model implementations here, following the same train/predict pattern.
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+First problem i had with tabpfn was this error
+ValueError: Number of samples 70380 in the input data is greater than the maximum number of samples 10000 officially supported by TabPFN. Set `ignore_pretraining_limits=True` to override this error!
+this happened when i tried to run TabPFN on the full bike_sharing_demand dataset.
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+second problem
+NotImplementedError: Memory estimation for MPS devices is not currently supported. If you have experience with getting memory information for MPS devices, we would gladly appreciate a contribution!
