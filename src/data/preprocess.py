@@ -1,7 +1,8 @@
 # src/data/preprocess.py
 
 from pathlib import Path
-from .load import (
+import pandas as pd
+from data.load import (
     get_available_datasets,
     get_available_folds,
     load_fold,
@@ -45,6 +46,28 @@ def print_dataset_info():
         print("Full y_test:\n", y_full_te)
 
         print("\n" + "="*80 + "\n")
+
+def preprocess_features(X_train: pd.DataFrame, X_test: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Convert categorical features to numeric using one-hot encoding,
+    align columns, and fill missing values.
+    """
+    # ensure all features are strings or numerics
+    X_train = X_train.copy()
+    X_test = X_test.copy()
+
+    # convert the categorical values to one-hot
+    X_train = pd.get_dummies(X_train)
+    X_test = pd.get_dummies(X_test)
+
+    # align columns of train and test sets
+    X_train, X_test = X_train.align(X_test, join="left", axis=1, fill_value=0)
+
+    # fill any remaining NaNs with 0
+    X_train = X_train.fillna(0)
+    X_test = X_test.fillna(0)
+
+    return X_train, X_test
 
 
 if __name__ == "__main__":

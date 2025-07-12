@@ -1,0 +1,12 @@
+TabNet is the deep learning architecture designed for the tabular data. 
+
+This has better interpretability compared to the standard deep models and works very well for the large-scale datasets 
+(in our example datasets works great with superconductivity - mean R2 0.86). It also allows for automatic feature selectionnd learns froboh categorical and cont features. 
+
+
+tabnet_train.py -> loads the dataset, uses preprocessing from preprocess.py, and trains a TabNet model using k-fold cross-validation. It also evaluates model performance using the R2 metric and saves the trained models for each fold.
+
+tabnet_predict.py -> loads the saved model and performs predictions on new data and saves into CSV
+
+
+

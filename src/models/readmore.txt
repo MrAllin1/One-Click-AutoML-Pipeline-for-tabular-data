@@ -2,6 +2,9 @@ Model training and inference code:
 - tabpfn_train.py   → training workflow using TabPFNClassifier  
 - tabpfn_predict.py → inference script producing CSV predictions  
 
+- tabnet_train.py. -> TabNet regressor with PyTorch TabNet 
+- tabnet_predict.py -> forms the predictions on the new data
+
 Feel free to add other model implementations here, following the same train/predict pattern.
 
 

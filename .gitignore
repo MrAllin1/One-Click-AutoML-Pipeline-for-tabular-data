@@ -3,6 +3,8 @@
 *.parquet
 *.egg-info
 __pycache__
+data
+models/tabnet
 
 # TODO: add/edit your venv folder name here (if you use venv)
 automl-tabular-env
