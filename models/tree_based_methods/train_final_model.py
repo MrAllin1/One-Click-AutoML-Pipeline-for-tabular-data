@@ -146,8 +146,9 @@ def main():
 
     # gather all labelled rows
     Xs, ys = [], []
-    for sp in sorted(p for p in root.iterdir() if p.is_dir() and p.name.isdigit(),
-                     key=lambda p: int(p.name)):
+    for sp in sorted(
+        (p for p in root.iterdir() if p.is_dir() and p.name.isdigit()),
+        key=lambda p: int(p.name)):
         Xs += [pd.read_parquet(sp/"X_train.parquet"),
                pd.read_parquet(sp/"X_test.parquet")]
         ys += [pd.read_parquet(sp/"y_train.parquet").squeeze(),
