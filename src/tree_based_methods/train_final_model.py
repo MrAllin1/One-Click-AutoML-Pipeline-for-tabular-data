@@ -90,45 +90,89 @@ def tune_lgbm(X, y, cats, cfg, seed=0):
 
 # ─────────────────────────────── catboost tuner ───────
 def tune_cat(X, y, cats, cfg, seed=0):
-    if cfg["row_frac"] < 1.0:
-        samp = np.random.RandomState(0).choice(len(X),
-                 int(cfg["row_frac"] * len(X)), replace=False)
-        X, y = X.iloc[samp], y.iloc[samp]
+    """
+    Tune CatBoost hyperparameters via Optuna, then train a final GPU model.
+    
+    Parameters:
+    - X: pandas DataFrame of training features
+    - y: pandas Series of training targets
+    - cats: list of column names to treat as categorical
+    - cfg: dict with keys 'folds' and 'early_stop'
+    - seed: random seed for reproducibility
+    
+    Returns:
+    - final: a fitted CatBoostRegressor on the full dataset
+    - best_params: the dict of best trial parameters (before renaming)
+    """
+    # If you're subsampling for speed, do it here (optional)
+    if cfg.get("row_frac", 1.0) < 1.0:
+        idx = np.random.RandomState(seed).choice(
+            len(X), int(cfg["row_frac"] * len(X)), replace=False
+        )
+        X, y = X.iloc[idx], y.iloc[idx]
 
-    Xnp   = X.values
-    cat_i = [X.columns.get_loc(c) for c in cats]
+    # Prepare numpy array and categorical indices
+    X_np = X.values
+    cat_idx = [X.columns.get_loc(c) for c in cats]
 
     def objective(trial):
-        p = dict(
-            loss_function="RMSE", eval_metric="RMSE", random_seed=seed,
-            iterations=10_000, task_type="CPU", thread_count=4,
-            learning_rate=trial.suggest_float("lr", 0.01, 0.2, log=True),
-            depth=trial.suggest_int("depth", 4, 10),
-            l2_leaf_reg=trial.suggest_float("l2", 1e-3, 10, log=True),
-            bagging_temperature=trial.suggest_float("bag", 0, 1),
-            border_count=trial.suggest_int("border", 32, 255),
-            od_type="Iter", od_wait=cfg["early_stop"], verbose=0,
-        )
-        rms = []
-        kf = KFold(cfg["folds"], shuffle=True, random_state=seed)
-        for tr, vl in kf.split(Xnp):
-            m = CatBoostRegressor(**p)
-            m.fit(Pool(Xnp[tr], y.iloc[tr], cat_i),
-                  eval_set=Pool(Xnp[vl], y.iloc[vl], cat_i),
-                  use_best_model=True, verbose=False)
-            rms.append(m.best_score_["validation"]["RMSE"])
-        return np.mean(rms)
+        # Suggest hyperparameters
+        params = {
+            "learning_rate": trial.suggest_float("lr", 1e-3, 0.3, log=True),
+            "depth": trial.suggest_int("depth", 4, 10),
+            "l2_leaf_reg": trial.suggest_float("l2", 1e-3, 10.0, log=True),
+            "bagging_temperature": trial.suggest_float("bag", 0.0, 1.0),
+            "border_count": trial.suggest_int("border", 32, 255),
+            "loss_function": "RMSE",
+            "eval_metric": "RMSE",
+            "iterations": 10_000,
+            "random_seed": seed,
+            "task_type": "GPU",
+            "thread_count": 4,
+            "od_type": "Iter",
+            "od_wait": cfg["early_stop"],
+            "verbose": 0,
+        }
 
-    study = optuna.create_study(direction="minimize",
-                                sampler=TPESampler(seed=42))
-    study.optimize(objective, n_trials=cfg["n_trials"], show_progress_bar=True)
+        # 5-fold CV
+        rmses = []
+        kf = KFold(n_splits=cfg["folds"], shuffle=True, random_state=seed)
+        for tr_idx, val_idx in kf.split(X_np):
+            train_pool = Pool(X_np[tr_idx], y.iloc[tr_idx], cat_features=cat_idx)
+            val_pool = Pool(X_np[val_idx], y.iloc[val_idx], cat_features=cat_idx)
+            model = CatBoostRegressor(**params)
+            model.fit(train_pool, eval_set=val_pool, use_best_model=True, verbose=False)
+            rmses.append(model.best_score_["validation"]["RMSE"])
+        return np.mean(rmses)
 
-    best = study.best_trial.params | dict(
-        loss_function="RMSE", eval_metric="RMSE", random_seed=seed,
-        iterations=10_000, task_type="CPU", thread_count=4,
-        od_type="Iter", od_wait=cfg["early_stop"], verbose=0)
-    final = CatBoostRegressor(**best)
-    final.fit(Pool(Xnp, y, cat_i), use_best_model=True)
+    # Run Optuna study
+    study = optuna.create_study(direction="minimize", sampler=TPESampler(seed=seed))
+    study.optimize(objective, n_trials=cfg.get("n_trials", 20), show_progress_bar=True)
+
+    # Extract best trial params and remap to CatBoost API
+    bp = study.best_trial.params.copy()
+    bp["learning_rate"]       = bp.pop("lr")
+    bp["bagging_temperature"] = bp.pop("bag")
+    bp["border_count"]        = bp.pop("border")
+
+    # Add fixed settings
+    bp.update({
+        "loss_function": "RMSE",
+        "eval_metric": "RMSE",
+        "iterations": 10_000,
+        "random_seed": seed,
+        "task_type": "GPU",
+        "thread_count": 4,
+        "od_type": "Iter",
+        "od_wait": cfg["early_stop"],
+        "verbose": 0,
+    })
+
+    # Train final model on full data
+    final = CatBoostRegressor(**bp)
+    final.fit(Pool(X_np, y, cat_features=cat_idx), use_best_model=True)
+
+    # Return the fitted model and the raw best_params (before remapping)
     return final, study.best_trial.params
 
 # ─────────────────────────────────── main pipeline ────
@@ -146,8 +190,9 @@ def main():
 
     # gather all labelled rows
     Xs, ys = [], []
-    for sp in sorted(p for p in root.iterdir() if p.is_dir() and p.name.isdigit(),
-                     key=lambda p: int(p.name)):
+    for sp in sorted(
+        (p for p in root.iterdir() if p.is_dir() and p.name.isdigit()),
+        key=lambda p: int(p.name)):
         Xs += [pd.read_parquet(sp/"X_train.parquet"),
                pd.read_parquet(sp/"X_test.parquet")]
         ys += [pd.read_parquet(sp/"y_train.parquet").squeeze(),

@@ -1,0 +1,8 @@
+cpu-bind=MASK - dlcgpu14, task  0  0 [342390]: mask 0xf0000000f000000 set
+/var/spool/slurm/job19913527/slurm_script: line 11: /etc/profile.d/modules.sh: No such file or directory
+/var/spool/slurm/job19913527/slurm_script: line 12: module: command not found
+/var/spool/slurm/job19913527/slurm_script: line 13: module: command not found
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/src/tree_based_methods/train_final_model.py:42: DeprecationWarning: is_categorical_dtype is deprecated and will be removed in a future version. Use isinstance(dtype, pd.CategoricalDtype) instead
+  or pd.api.types.is_categorical_dtype(df[col])):
+[I 2025-07-20 16:23:34,778] A new study created in memory with name: no-name-5c1f94a0-3944-4db5-af6a-03fa16c07370
+  0%|          | 0/10 [00:00<?, ?it/s]                                        0%|          | 0/10 [13:38<?, ?it/s]Best trial: 0. Best value: 28.4369:   0%|          | 0/10 [13:38<?, ?it/s]Best trial: 0. Best value: 28.4369:  10%|█         | 1/10 [13:38<2:02:45, 818.41s/it]
