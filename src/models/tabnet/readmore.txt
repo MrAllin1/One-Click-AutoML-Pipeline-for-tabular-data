@@ -1,12 +1,23 @@
-TabNet is the deep learning architecture designed for the tabular data. 
-
-This has better interpretability compared to the standard deep models and works very well for the large-scale datasets 
-(in our example datasets works great with superconductivity - mean R2 0.86). It also allows for automatic feature selectionnd learns froboh categorical and cont features. 
+*TabNet Model* 
 
 
-tabnet_train.py -> loads the dataset, uses preprocessing from preprocess.py, and trains a TabNet model using k-fold cross-validation. It also evaluates model performance using the R2 metric and saves the trained models for each fold.
-
-tabnet_predict.py -> loads the saved model and performs predictions on new data and saves into CSV
+About : TabNet is the deep learning architecture that is designed specifically for the tabular data. It uses the 'attention mechanism' allowing it to automatically pick the most important features for the predictions. It is highly intepretable and does not require a lot of manual feature engineering. It can handle non-linear relationships and redudant features. 
 
 
+Why would we need this : The model works best when the data given is large, complex and has non-linear relationships.TabNet can also handle the cases of mixed dataset(one with both continous and categorical variables) On the other hand it can underperform when data is small and very structured. Overall to make our final model versatile - TabPFN is the SOTA for small scale tabular data, Tree based models/ CatBoost is highly competitive with medium to large datasets and TabNet is excellent with providing strong R^2 scores on very large, high-dimensional data. 
 
+
+The architecture design: Tabnet Pipeline 
+
+1. tabnet_train.py - The script loads each fold training and test data, preprocesses and converts the data into numpy float32 (for compatibility with TabNet)
+                   - Runs Optuna for Hyperparameter Optimisation with 20 trials per fold to tune the parameters 
+                   - trains the final model on the fold using the best hyperparamters and saves the final model as a zip file in the models/tabnet_ensemble
+
+2. tabnet_ensemble.py - performs cross-validation ensembling by aggregating predictions from all the folds models excluding the current fold.
+                      - calculates the R^2 of the ensemble predictions and ouputs the mean of the ensemble R^2
+
+3. tabnet_pipeline.py - the script automates the training followed by the ensembling to a single command. 
+                      - usage : python src/models/tabnet/tabnet_pipeline.py --dataset_path bike_sharing_demand --output_dir models/tabnet_ensemble
+
+
+training time : ~3hrs (trained locally)
