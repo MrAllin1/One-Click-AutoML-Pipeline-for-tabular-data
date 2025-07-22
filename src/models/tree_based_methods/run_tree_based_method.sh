@@ -24,8 +24,8 @@ print("GPU name       :", torch.cuda.get_device_name(0) if torch.cuda.is_availab
 PY
 
 # ── set the dataset directory and output directory ─────────────────────
-DATASET_DIR="/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/data/wine_quality"
-OUTPUT_DIR="/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/models/tree_based_methods_output/wine_quality"
+DATASET_DIR="/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/data/superconductivity"
+OUTPUT_DIR="/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/models/tree_based_methods_output/superconductivity"
 
 # ── train the final model on all splits ───────────────────────────────
 echo "Training final model on all splits"

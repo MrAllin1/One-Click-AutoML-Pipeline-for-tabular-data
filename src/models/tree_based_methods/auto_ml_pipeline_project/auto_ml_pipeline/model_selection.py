@@ -7,6 +7,15 @@ from sklearn.metrics import r2_score
 from config import ENSEMBLE
 from .hyperparameter_tuning import tune_lgbm, tune_catboost
 
+class EnsembleModel:
+    """Simple 50/50 blend of two models."""
+    def __init__(self, m1, m2):
+        self.m1 = m1
+        self.m2 = m2
+
+    def predict(self, X):
+        return 0.5 * self.m1.predict(X) + 0.5 * self.m2.predict(X)
+
 
 def select_and_train(X_tr, y_tr, X_te, y_te, output_dir):
     """
@@ -45,7 +54,11 @@ def select_and_train(X_tr, y_tr, X_te, y_te, output_dir):
         models[name2] = model2
         results[name2] = r2_2
 
+        # compute blend metrics
         blend = 0.5*preds1 + 0.5*preds2
         results['ensemble'] = r2_score(y_te, blend)
+
+        # store the ensemble model object
+        models['ensemble'] = EnsembleModel(model1, model2)
 
     return models, results
