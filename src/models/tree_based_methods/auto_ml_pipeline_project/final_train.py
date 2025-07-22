@@ -53,16 +53,20 @@ def main():
         X_all_fe, y_all, X_all_fe, y_all,
         output_dir=args.output_dir
     )
+    
+    print("DEBUG models keys:", list(models.keys()))
+    print("DEBUG metrics:", metrics)
 
-    # 4. Save only the primary model
-    primary = 'ensemble' if 'ensemble' in models else list(models.keys())[0]
+    # 4. Pick and save the model with the best R²
+    primary = max(metrics.items(), key=lambda item: item[1])[0]
     model_path = os.path.join(args.output_dir, f"final_{primary}.pkl")
     save_model(models[primary], model_path)
-    print(f"Saved final model to {model_path}")
+    print(f"Saved final model ({primary}) to {model_path}")
 
-    # 5. Report CV metrics used for selection
+    # 5. Write out metrics
     report_results(metrics, args.output_dir)
     print(f"Metrics written to {os.path.join(args.output_dir, 'metrics.json')}")
+
 
 if __name__ == "__main__":
     main()

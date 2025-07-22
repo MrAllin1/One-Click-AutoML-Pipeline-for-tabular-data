@@ -51,7 +51,7 @@ def tune_lgbm(X, y):
     study.optimize(objective, n_trials=MAX_TRIALS)
     best = study.best_params
     final_model = lgb.LGBMRegressor(**best, n_estimators=study.best_trial.user_attrs.get('best_iteration', 1000), random_state=RANDOM_SEED, verbosity=-1)
-    final_model.fit(X, y, verbose=-1)
+    final_model.fit(X, y)
     return final_model, best
 
 

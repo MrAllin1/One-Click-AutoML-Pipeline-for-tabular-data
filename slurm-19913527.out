@@ -1,5 +1,0 @@
-CUDA available : True
-GPU count      : 1
-GPU name       : NVIDIA GeForce RTX 2080 Ti
-▶ bike_sharing_demand  |  tier=S-quick
-Rows=78,200  |  features=11  cats=7  →  catboost
