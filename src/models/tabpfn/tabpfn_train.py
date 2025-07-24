@@ -1,11 +1,4 @@
-#!/usr/bin/env python3
-# ──────────────────────────────────────────────────────────────────────────────
-# Train TabPFNRegressor on every fold of a dataset and save:
-#   • one model per fold         →  <output_dir>/<dataset>/fold<k>.pkl
-#   • an ensemble                →  <output_dir>/<dataset>/ensemble.pkl
-#   • TensorBoard logs           →  <output_dir>/runs/<timestamp>/
-# Also logs ensemble‑level metrics and system stats to TensorBoard.
-# ──────────────────────────────────────────────────────────────────────────────
+#src/models/tabpfn/tabpfn_train.py
 from __future__ import annotations
 
 import argparse
@@ -44,7 +37,7 @@ def _device() -> str:
 
 
 # ─── Training function ────────────────────────────────────────────────────────
-def train_folds(dataset: str, output_dir: Path, seed: int = 0):
+def train_tabpfn_ensemble(dataset: str, output_dir: Path, seed: int = 0):
     """
     dataset
         Path to dataset root (contains fold parquet files).
@@ -110,6 +103,7 @@ def train_folds(dataset: str, output_dir: Path, seed: int = 0):
                 torch.cuda.empty_cache()
 
     # ---------- summary & ensemble ------------------------------------------
+    ens_path,r2_ens = None, None
     if scores:
         mean, std = np.mean(scores), np.std(scores)
         logger.info(f"Mean R² over {len(scores)} folds: {mean:.4f} ± {std:.4f}")
@@ -118,6 +112,7 @@ def train_folds(dataset: str, output_dir: Path, seed: int = 0):
 
         # Build ensemble and evaluate on concatenated test sets
         ens_path = build_ensemble(dataset_outdir, pattern="fold*.pkl")
+
         ensemble = pickle.load(open(ens_path, "rb"))
 
         X_test_full = pd.concat(X_test_parts, ignore_index=True)
@@ -142,7 +137,7 @@ def train_folds(dataset: str, output_dir: Path, seed: int = 0):
     writer.add_text("hparams", f"seed: {seed}\ndevice: {device}", 0)
     writer.close()
 
-    return model_paths, scores
+    return ens_path, r2_ens
 
 
 # ─── CLI ──────────────────────────────────────────────────────────────────────
@@ -159,4 +154,4 @@ if __name__ == "__main__":
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    train_folds(dataset=args.dataset, output_dir=out_dir, seed=args.seed)
+    train_tabpfn_ensemble(dataset=args.dataset, output_dir=out_dir, seed=args.seed)

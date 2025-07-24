@@ -3,7 +3,7 @@
 import argparse
 from pathlib import Path
 
-from .tabpfn_train import train_folds
+from .tabpfn_train import train_tabpfn_ensemble
 from .tabpfn_ensemble import build_ensemble
 
 
@@ -32,4 +32,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # 1) Train each fold (uses TabPFN's default ensemble size)
-    train_folds(args.dataset, Path(args.model_dir), seed=args.seed)
+    train_tabpfn_ensemble(args.dataset, Path(args.model_dir), seed=args.seed)

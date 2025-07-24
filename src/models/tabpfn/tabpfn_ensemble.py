@@ -1,8 +1,4 @@
-#!/usr/bin/env python3
-# ──────────────────────────────────────────────────────────────────────────────
-# Simple wrapper that averages predictions from multiple TabPFNRegressor
-# models saved as pickles and exports a single ensemble file.
-# ──────────────────────────────────────────────────────────────────────────────
+# src/models/tabpfn/tabpfn_ensemble.py
 from __future__ import annotations
 
 import pickle

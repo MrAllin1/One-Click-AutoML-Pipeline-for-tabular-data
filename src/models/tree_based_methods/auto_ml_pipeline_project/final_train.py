@@ -6,11 +6,12 @@ Entry point to train final model on all splits under a dataset folder.
 """
 import argparse
 import os
+from pathlib import Path
 
-from auto_ml_pipeline.data_processing import load_all_splits
-from auto_ml_pipeline.feature_engineering import engineer_features
-from auto_ml_pipeline.model_selection import select_and_train
-from auto_ml_pipeline.utils import setup_logging, save_model, report_results
+from .auto_ml_pipeline.data_processing import load_all_splits
+from .auto_ml_pipeline.feature_engineering import engineer_features
+from .auto_ml_pipeline.model_selection import select_and_train
+from .auto_ml_pipeline.utils import setup_logging, save_model, report_results
 
 
 def parse_args():
@@ -67,6 +68,45 @@ def main():
     report_results(metrics, args.output_dir)
     print(f"Metrics written to {os.path.join(args.output_dir, 'metrics.json')}")
 
+# Used for the final pipeline to train tree-based methods on all splits under a dataset folder.
+def tree_based_methods_model(dataset_path: str, output_dir: str) -> tuple[Path, float]:
+    """
+    Train tree‑based models on all splits under `dataset_path`, pick & save the best
+    by R², write out metrics.json, and return (model_path, best_r2).
+    """
+    # 1) Prepare dirs & logging
+    outdir = Path(output_dir)
+    outdir.mkdir(parents=True, exist_ok=True)
+    setup_logging(str(outdir))
+
+    # 2) Load & merge all splits
+    X_all, y_all = load_all_splits(dataset_path)
+    if X_all.shape[1] == 0:
+        raise RuntimeError("No features loaded from splits.")
+
+    # 3) Feature engineering
+    X_all_fe, _ = engineer_features(X_all, X_all.copy())
+    if X_all_fe.shape[1] == 0:
+        raise RuntimeError("No features after engineering.")
+
+    # 4) Model selection & training
+    models, metrics = select_and_train(
+        X_all_fe, y_all,
+        X_all_fe, y_all,
+        output_dir=str(outdir)
+    )
+    if not metrics:
+        raise RuntimeError("No models were trained.")
+
+    # 5) Pick best R2 and save
+    primary, best_r2 = max(metrics.items(), key=lambda kv: kv[1])
+    model_path = outdir / f"final_{primary}.pkl"
+    save_model(models[primary], str(model_path))
+
+    # 6) Write full metrics.json / any reports
+    report_results(metrics, str(outdir))
+
+    return model_path, best_r2
 
 if __name__ == "__main__":
     main()
