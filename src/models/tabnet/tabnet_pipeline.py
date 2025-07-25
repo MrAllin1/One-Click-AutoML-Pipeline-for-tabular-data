@@ -5,8 +5,8 @@ import re
 import sys
 import io
 from typing import Tuple
-from src.models.tabnet.tabnet_train import main as _train_main
-from src.models.tabnet.tabnet_ensembling import main as _ensemble_main
+from .tabnet_train import main as _train_main
+from .tabnet_ensembling import main as _ensemble_main
 
 #-----------------------------
 #  Function to run TabNet training via subprocess (unchanged)

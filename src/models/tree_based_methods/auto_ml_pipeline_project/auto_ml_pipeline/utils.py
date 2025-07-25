@@ -6,8 +6,6 @@ import json
 import logging
 import torch
 
-from config import RANDOM_SEED
-
 
 def setup_logging(output_dir):
     logging.basicConfig(

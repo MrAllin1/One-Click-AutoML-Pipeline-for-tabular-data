@@ -4,7 +4,7 @@ Selects algorithm (LightGBM or CatBoost), trains with HPO, ensembles.
 import os
 
 from sklearn.metrics import r2_score
-from config import ENSEMBLE
+from ..config import ENSEMBLE
 from .hyperparameter_tuning import tune_lgbm, tune_catboost
 
 class EnsembleModel:

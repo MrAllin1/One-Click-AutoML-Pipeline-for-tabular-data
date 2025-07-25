@@ -12,7 +12,7 @@ import lightgbm as lgb  # noqa
 # LightGBM logging will be controlled via model constructor verbose flags
 from catboost import CatBoostRegressor
 
-from config import MAX_TRIALS, CV_FOLDS, RANDOM_SEED, EARLY_STOPPING_ROUNDS
+from ..config import MAX_TRIALS, CV_FOLDS, RANDOM_SEED, EARLY_STOPPING_ROUNDS
 
 # Note: LightGBM will suppress warnings via verbose flags on models
 

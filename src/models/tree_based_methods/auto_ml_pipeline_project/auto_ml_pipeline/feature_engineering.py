@@ -5,8 +5,6 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 
-from config import RANDOM_SEED
-
 def engineer_features(X_train, X_test):
     # Copy to avoid modifying original
     X_tr = X_train.copy()
