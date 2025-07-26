@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 import argparse
+import pickle
 from pathlib import Path
+
+import numpy as np
 import torch
+import joblib
 
 from models.tabpfn.tabpfn_train import train_tabpfn_ensemble
 from models.tree_based_methods.auto_ml_pipeline_project.final_train import tree_based_methods_model
@@ -14,55 +18,90 @@ def _device() -> str:
         return "mps"
     return "cpu"
 
-def train_each_model_sequentially(dataset: Path, output_dir: Path):
+class WeightedEnsemble:
     """
-    dataset: Path to dataset root (contains fold parquet files).
-    output_dir: Path where models and artifacts will be saved.
+    Wraps models supporting .predict(X) to return a weighted average of predictions.
     """
-    seed = 1
+    def __init__(self, models, weights):
+        self.models = models
+        w = np.array(weights, dtype=float)
+        self.weights = w / w.sum()
 
-    # TabPFN Ensemble
-    tabpfn_model_path, tabpfn_r2 = train_tabpfn_ensemble(
-        str(dataset), output_dir=output_dir, seed=seed
-    )
-    print(f"TabPFN Ensemble Model Path: {tabpfn_model_path}")
-    print(f"TabPFN Ensemble R2: {tabpfn_r2}")
+    def predict(self, X):
+        # collect predictions from each model
+        preds = [m.predict(X) for m in self.models]
+        # weighted sum along model axis
+        return np.tensordot(self.weights, preds, axes=[0, 0])
 
-    # Tree-based methods
-    tree_model_path, tree_r2 = tree_based_methods_model(
-        str(dataset), str(output_dir)
-    )
-    print(f"Tree Based Model Path: {tree_model_path}")
-    print(f"Tree Based Model R2: {tree_r2}")
 
-    # TabNet pipeline
-    tabnet_model_path, tabnet_r2 = tabnet_final_pipeline(
-        str(dataset), str(output_dir)
-    )
-    print(f"TabNet Model Path: {tabnet_model_path}")
-    print(f"TabNet Model R2: {tabnet_r2}")
+def load_model(path: Path):
+    """
+    Load a model by file extension (.pkl/.joblib via joblib, .pt/.pth via torch).
+    """
+    ext = path.suffix.lower()
+    if ext in {'.pkl', '.joblib'}:
+        return joblib.load(path)
+    if ext in {'.pt', '.pth'}:
+        return torch.load(path, map_location='cpu')
+    # fallback
+    return joblib.load(path)
+
+
+def train_and_ensemble(dataset: Path, output_dir: Path, seed: int = 1):
+    # 1) Train each model and capture paths + R²
+    tabpfn_path, tabpfn_r2 = train_tabpfn_ensemble(
+        str(dataset), output_dir=output_dir, seed=seed)
+    print(f"TabPFN Ensemble → {tabpfn_path} (R²={tabpfn_r2:.4f})")
+
+    tree_path, tree_r2 = tree_based_methods_model(
+        str(dataset), str(output_dir))
+    print(f"Tree-based → {tree_path} (R²={tree_r2:.4f})")
+
+    tabnet_path, tabnet_r2 = tabnet_final_pipeline(
+        str(dataset), str(output_dir))
+    print(f"TabNet → {tabnet_path} (R²={tabnet_r2:.4f})")
+
+    # 2) Compute normalized weights from R² scores
+    r2s = np.array([tabpfn_r2, tree_r2, tabnet_r2])
+    weights = r2s / r2s.sum()
+    print("Ensemble weights:", dict(
+        TabPFN=weights[0],
+        Tree=weights[1],
+        TabNet=weights[2]
+    ))
+
+    # 3) Load the trained model objects
+    models = [
+        load_model(Path(tabpfn_path)),
+        load_model(Path(tree_path)),
+        load_model(Path(tabnet_path))
+    ]
+
+    # 4) Build ensemble and save
+    ensemble = WeightedEnsemble(models, weights)
+    final_path = output_dir / "final_model.pkl"
+    with open(final_path, "wb") as f:
+        pickle.dump(ensemble, f)
+    print(f"Saved weighted ensemble to {final_path}")
+    return final_path
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Sequential training of TabPFN, tree-based, and TabNet models"
+        description="Train TabPFN, tree-based & TabNet, then build weighted ensemble"
     )
     parser.add_argument(
-        "-d", "--dataset",
-        required=True,
-        help="Path to the dataset root folder containing fold files"
+        "-d", "--dataset", required=True,
+        help="Path to dataset root folder containing fold files"
     )
     parser.add_argument(
-        "-o", "--out-dir",
-        dest="out_dir",
-        required=True,
-        help="Directory where trained models and outputs will be saved"
+        "-o", "--out-dir", dest="out_dir", required=True,
+        help="Directory where models and final_model.pkl will be saved"
     )
     args = parser.parse_args()
 
-    # Resolve paths
     dataset = Path(args.dataset)
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # Run training with correct Path types
-    train_each_model_sequentially(dataset, out_dir)
+    train_and_ensemble(dataset, out_dir)
