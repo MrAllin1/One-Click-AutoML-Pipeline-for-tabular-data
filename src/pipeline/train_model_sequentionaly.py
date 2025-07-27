@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import joblib
 
-from models.tabpfn.tabpfn_train import train_tabpfn_ensemble
+from models.bootstrap_tabpfn.bootstrap_tabpfn_train import train_bootstrap
 from models.tree_based_methods.auto_ml_pipeline_project.final_train import tree_based_methods_model
 from models.tabnet.tabnet_pipeline import tabnet_final_pipeline
 

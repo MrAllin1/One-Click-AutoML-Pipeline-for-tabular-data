@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
         # Retrain final ensemble with those best params
         best = study.best_params
-        final_r2 = train_bootstrap(
+        _, final_r2 = train_bootstrap(
             dataset=args.dataset,
             output_dir=out,
             n_bootstrap=best["n_bootstrap"],
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
     else:
         # manual mode
-        r2 = train_bootstrap(
+        _, r2 = train_bootstrap(
             dataset=args.dataset,
             output_dir=out,
             n_bootstrap=args.n_bootstrap,

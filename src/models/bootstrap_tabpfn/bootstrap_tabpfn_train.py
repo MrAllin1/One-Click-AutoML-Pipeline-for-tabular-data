@@ -127,7 +127,7 @@ def train_bootstrap(
 
     writer.close()
     logger.info(f"Total time: {time.time() - start_time:.1f}s")
-    return oob_r2
+    return ens_path, oob_r2
 
 
 def objective(trial, args):
@@ -219,7 +219,7 @@ if __name__ == "__main__":
         logger.info(f"🏆 Best Params: {best}, R²={study.best_value:.5f}")
 
         # Retrain final ensemble with best params
-        final_r2 = train_bootstrap(
+        _, final_r2 = train_bootstrap(
             dataset=args.dataset,
             output_dir=out,
             n_bootstrap=best["n_bootstrap"],
@@ -230,7 +230,7 @@ if __name__ == "__main__":
         logger.info(f"📦 Final OOB R² with best params → {final_r2:.5f}")
 
     else:
-        r2 = train_bootstrap(
+        _, r2 = train_bootstrap(
             dataset=args.dataset,
             output_dir=out,
             n_bootstrap=args.n_bootstrap,
