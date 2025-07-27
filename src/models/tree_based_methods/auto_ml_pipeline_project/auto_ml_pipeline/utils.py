@@ -1,3 +1,5 @@
+# utils.py
+
 """
 Utility functions: logging, GPU detection, persistence, reporting.
 """

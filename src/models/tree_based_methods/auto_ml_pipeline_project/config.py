@@ -1,3 +1,5 @@
+# config.py
+
 """
 Global configuration parameters for the AutoML pipeline.
 """

@@ -1,8 +1,18 @@
+import random
 import pandas as pd
 from pathlib import Path
 from typing import Tuple,List,Dict
+import logging
 
 DATA_ROOT = Path(__file__).resolve().parents[2]/"data"
+
+# ─── Logging setup ────────────────────────────────────────────────────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
 
 
 def get_available_datasets(data_root: Path = DATA_ROOT) -> List[str]:
@@ -10,6 +20,48 @@ def get_available_datasets(data_root: Path = DATA_ROOT) -> List[str]:
     List all dataset names under data/, e.g. ["bike_sharing_demand", "wine_quality", ...].
     """
     return sorted([p.name for p in data_root.iterdir() if p.is_dir()])
+
+def simulate_exam_dataset(
+    dataset: str,
+    data_root: Path = DATA_ROOT,
+    fold: int | None = None
+) -> Tuple[pd.DataFrame, pd.DataFrame, int]:
+    """
+    Selects one fold (either the one you pass, or random if you pass None)
+    and returns (X_train, y_train, fold_number). Also saves the chosen fold
+    globally for `get_test_data()` fallback.
+    """
+    global _simulated_fold
+    folds = get_available_folds(dataset, data_root)
+
+    if fold is not None:
+        if fold not in folds:
+            raise ValueError(f"Fold {fold} not available for dataset {dataset}.")
+        _simulated_fold = fold
+    else:
+        _simulated_fold = random.choice(folds)
+
+    logger.info(f"Selected fold: {_simulated_fold} for dataset: {dataset}")
+    X_tr, _, y_tr, _ = load_fold(dataset, _simulated_fold, data_root)
+    return X_tr, y_tr, _simulated_fold
+
+
+def get_test_data(
+    dataset: str,
+    data_root: Path = DATA_ROOT,
+    fold: int | None = None
+) -> pd.DataFrame:
+    """
+    Returns X_test for the specified fold, or for the last fold chosen
+    by `simulate_exam_dataset()` if you omit `fold`.
+    """
+    global _simulated_fold
+    chosen = fold if fold is not None else _simulated_fold
+    if chosen is None:
+        raise RuntimeError("No fold set. Call simulate_exam_dataset(..., fold=...) first.")
+    logger.info(f"Loading X_test for fold {chosen} of dataset: {dataset}")
+    _, X_te, _, _ = load_fold(dataset, chosen, data_root)
+    return X_te
 
 
 def get_available_folds(dataset: str, data_root: Path = DATA_ROOT) -> List[int]:
