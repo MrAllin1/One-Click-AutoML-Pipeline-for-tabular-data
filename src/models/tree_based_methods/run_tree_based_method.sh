@@ -24,12 +24,12 @@ print("GPU name       :", torch.cuda.get_device_name(0) if torch.cuda.is_availab
 PY
 
 # ── set the paths for this fold ──────────────────────────────────────
-FOLD_DIR="/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/data/bike_sharing_demand/11"
+FOLD_DIR="/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/data/exam_dataset/1"
 X_TRAIN="$FOLD_DIR/X_train.parquet"
 Y_TRAIN="$FOLD_DIR/y_train.parquet"
 X_TEST="$FOLD_DIR/X_test.parquet"
 
-OUTPUT_DIR="/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/models/tree_based_methods_output/bike_sharing_demand_fold11"
+OUTPUT_DIR="/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/models/tree_based_methods_output/exam"
 
 # ── train the model on this fold ─────────────────────────────────────
 echo "Training model on fold": "$FOLD_DIR"
