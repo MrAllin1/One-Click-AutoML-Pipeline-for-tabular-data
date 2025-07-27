@@ -49,32 +49,32 @@ def load_model(path: Path):
 
 def train_and_ensemble(dataset: Path, output_dir: Path, seed: int = 1):
     # 1) Train each model and capture paths + R²
-    tabpfn_path, tabpfn_r2 = train_tabpfn_ensemble(
-        str(dataset), output_dir=output_dir, seed=seed)
+    tabpfn_path, tabpfn_r2 = train_bootstrap(
+        str(dataset), output_dir=output_dir, seed=seed,use_optuna=True, n_trials=50)
     print(f"TabPFN Ensemble → {tabpfn_path} (R²={tabpfn_r2:.4f})")
 
     tree_path, tree_r2 = tree_based_methods_model(
         str(dataset), str(output_dir))
     print(f"Tree-based → {tree_path} (R²={tree_r2:.4f})")
 
-    tabnet_path, tabnet_r2 = tabnet_final_pipeline(
-        str(dataset), str(output_dir))
-    print(f"TabNet → {tabnet_path} (R²={tabnet_r2:.4f})")
+    # tabnet_path, tabnet_r2 = tabnet_final_pipeline(
+    #     str(dataset), str(output_dir))
+    # print(f"TabNet → {tabnet_path} (R²={tabnet_r2:.4f})")
 
     # 2) Compute normalized weights from R² scores
-    r2s = np.array([tabpfn_r2, tree_r2, tabnet_r2])
+    r2s = np.array([tabpfn_r2, tree_r2])
     weights = r2s / r2s.sum()
     print("Ensemble weights:", dict(
         TabPFN=weights[0],
-        Tree=weights[1],
-        TabNet=weights[2]
+        Tree=weights[1]
+        # TabNet=weights[2]
     ))
 
     # 3) Load the trained model objects
     models = [
         load_model(Path(tabpfn_path)),
-        load_model(Path(tree_path)),
-        load_model(Path(tabnet_path))
+        load_model(Path(tree_path))
+        # load_model(Path(tabnet_path))
     ]
 
     # 4) Build ensemble and save
