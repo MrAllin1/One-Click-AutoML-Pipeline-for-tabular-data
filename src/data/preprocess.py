@@ -1,6 +1,7 @@
 # src/data/preprocess.py
 
 from pathlib import Path
+import numpy as np
 import pandas as pd
 from data.load import (
     get_available_datasets,
@@ -49,26 +50,38 @@ def print_dataset_info():
 
 def preprocess_features(X_train: pd.DataFrame, X_test: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Convert categorical features to numeric using one-hot encoding,
-    align columns, and fill missing values.
+    General-purpose feature preprocessing:
+    - One-hot encodes categorical variables
+    - Applies log1p to positive numeric columns
+    - Fills missing values
+    - Aligns train and test feature columns
     """
-    # ensure all features are strings or numerics
     X_train = X_train.copy()
     X_test = X_test.copy()
 
-    # convert the categorical values to one-hot
-    X_train = pd.get_dummies(X_train)
-    X_test = pd.get_dummies(X_test)
+    # Identify numeric and categorical columns
+    numeric_cols = X_train.select_dtypes(include=[np.number]).columns.tolist()
+    categorical_cols = X_train.select_dtypes(include=["object", "category", "bool"]).columns.tolist()
 
-    # align columns of train and test sets
-    X_train, X_test = X_train.align(X_test, join="left", axis=1, fill_value=0)
+    # --- Log-transform positive numeric features ---
+    def safe_log1p(df, cols):
+        for col in cols:
+            if (df[col] > 0).all():
+                df[col] = np.log1p(df[col])
+        return df
 
-    # fill any remaining NaNs with 0
-    X_train = X_train.fillna(0)
-    X_test = X_test.fillna(0)
+    X_train = safe_log1p(X_train, numeric_cols)
+    X_test = safe_log1p(X_test, numeric_cols)
+
+    # --- One-hot encode categoricals ---
+    X_train = pd.get_dummies(X_train, columns=categorical_cols, dummy_na=True)
+    X_test = pd.get_dummies(X_test, columns=categorical_cols, dummy_na=True)
+
+    # --- Align train and test columns ---
+    X_train, X_test = X_train.align(X_test, join="outer", axis=1, fill_value=0)
+
+    # --- Fill any remaining NaNs ---
+    X_train.fillna(0, inplace=True)
+    X_test.fillna(0, inplace=True)
 
     return X_train, X_test
-
-
-if __name__ == "__main__":
-    print_dataset_info()

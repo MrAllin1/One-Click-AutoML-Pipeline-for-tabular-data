@@ -1,78 +1,50 @@
-# src/models/tabnet/tabnet_ensembling.py
-
 import numpy as np
 import pandas as pd
-import torch
 from pathlib import Path
 from pytorch_tabnet.tab_model import TabNetRegressor
-from sklearn.metrics import r2_score
-from data import get_available_folds, load_fold
-from data.preprocess import preprocess_features
 
-#-----------------------------
-# Utility: Function to convert data to float32 numpy arrays
-#-----------------------------
 def to_numpy_float32(x):
-    if isinstance(x, pd.DataFrame):
-        return x.astype(np.float32).values
-    elif isinstance(x, pd.Series):
+    if isinstance(x, pd.DataFrame) or isinstance(x, pd.Series):
         return x.astype(np.float32).values
     else:
         return np.array(x).astype(np.float32)
 
-#-----------------------------
-# Utility: load model from folder
-#-----------------------------
-def load_tabnet_model(model_path):
+def load_model(path: Path):
     model = TabNetRegressor()
-    model.load_model(model_path)
+    model.load_model(str(path))
     return model
 
-#-----------------------------
-# Utility: Function to ensemble predictions from multiple models
-#-----------------------------
-def ensemble_predictions(models, X):
-    preds = [model.predict(X).ravel() for model in models]
-    return np.mean(preds, axis=0)
+def main(dataset_dir: Path, model_dir: Path, output_file: Path):
+    X_test = pd.read_parquet(dataset_dir / "X_test.parquet")
+    X_test_np = to_numpy_float32(X_test)
 
-#-----------------------------
-# Main function to run ensembling across all folds
-#-----------------------------  
-def main(dataset: str, model_dir: Path):
-    folds = get_available_folds(dataset)
-    r2_scores = []
+    # Load all fold models
+    model_paths = sorted(model_dir.glob("tabnet_fold*.zip"))
+    if len(model_paths) == 0:
+        raise FileNotFoundError(f"No fold models found in {model_dir}")
 
-    for fold in folds:
-        print(f"\n[+] Evaluating Fold {fold} with Ensemble")
-        # load fold data
-        X_tr, X_te, y_tr, y_te = load_fold(dataset, fold)
-        X_tr, X_te = preprocess_features(X_tr, X_te)
+    print(f"Found {len(model_paths)} fold models. Loading and predicting...")
+    preds_all = []
+    for model_path in model_paths:
+        model = load_model(model_path)
+        preds = model.predict(X_test_np).ravel()
+        preds_all.append(preds)
 
-        X_te_np = to_numpy_float32(X_te)
-        y_te_np = to_numpy_float32(y_te).reshape(-1, 1)
+    # Ensemble by averaging predictions
+    ensemble_preds = np.mean(preds_all, axis=0)
 
-        # Load all models except current fold
-        model_paths = [model_dir / f"tabnet_fold{f}.zip" for f in folds if f != fold]
-        models = [load_tabnet_model(str(path)) for path in model_paths]
+    # Save predictions
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    df_preds = pd.DataFrame({"prediction": ensemble_preds})
+    df_preds.to_csv(output_file, index=False)
+    print(f"Saved predictions to {output_file}")
 
-        # Ensemble Predictions
-        preds = ensemble_predictions(models, X_te_np)
-
-        r2 = r2_score(y_te_np.ravel(), preds)
-        print(f"[+] Ensemble R2 for Fold {fold}: {r2:.4f}")
-        r2_scores.append(r2)
-    # Overall R2 score across all folds
-    print(f"\n[+] Mean Ensemble R2 across folds: {np.mean(r2_scores):.4f} ± {np.std(r2_scores):.4f}")
-
-#-----------------------------
-# CLI
-#-----------------------------  
 if __name__ == "__main__":
     import argparse
-
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--dataset", required=True)
-    parser.add_argument("-m", "--model-dir", type=Path, default=Path("models/trial_tabnet"))
+    parser.add_argument("--dataset_dir", type=Path, required=True, help="Path to folder containing X_test.parquet")
+    parser.add_argument("--model_dir", type=Path, required=True, help="Folder where fold models are saved")
+    parser.add_argument("--output_file", type=Path, default=Path("y_pred.csv"), help="CSV file to save predictions")
     args = parser.parse_args()
 
-    main(args.dataset, args.model_dir)
+    main(args.dataset_dir, args.model_dir, args.output_file)
