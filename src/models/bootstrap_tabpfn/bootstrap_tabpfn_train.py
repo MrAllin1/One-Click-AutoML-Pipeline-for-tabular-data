@@ -43,7 +43,7 @@ def train_bootstrap(
     n_bootstrap: int = 10,
     sample_frac: float = 0.8,
     seed: int = 0,
-    fold: int | None = None,
+    fold: int = 1,
     use_optuna: bool = False,
     n_trials: int = 10,
 ) -> tuple[Path, float]:

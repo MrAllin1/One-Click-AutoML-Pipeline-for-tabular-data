@@ -50,7 +50,7 @@ def load_model(path: Path):
 def train_and_ensemble(dataset: Path, output_dir: Path, seed: int = 1):
     # 1) Train each model and capture paths + R²
     tabpfn_path, tabpfn_r2 = train_bootstrap(
-        str(dataset), output_dir=output_dir, seed=seed,use_optuna=True, n_trials=50)
+        str(dataset), output_dir=output_dir, seed=seed,use_optuna=True, n_trials=50,fold=1)
     print(f"TabPFN Ensemble → {tabpfn_path} (R²={tabpfn_r2:.4f})")
 
     tree_path, tree_r2 = tree_based_methods_model(
