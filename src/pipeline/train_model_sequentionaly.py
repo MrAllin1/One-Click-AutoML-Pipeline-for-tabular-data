@@ -57,24 +57,25 @@ def train_and_ensemble(dataset: Path, output_dir: Path, seed: int = 1):
         str(dataset), str(output_dir))
     print(f"Tree-based → {tree_path} (R²={tree_r2:.4f})")
 
-    # tabnet_path, tabnet_r2 = tabnet_final_pipeline(
-    #     str(dataset), str(output_dir))
-    # print(f"TabNet → {tabnet_path} (R²={tabnet_r2:.4f})")
+    tabnet_path, tabnet_r2 = tabnet_final_pipeline(
+        str(dataset), str(output_dir))
+    print(f"TabNet → {tabnet_path} (R²={tabnet_r2:.4f})")
+
 
     # 2) Compute normalized weights from R² scores
     r2s = np.array([tabpfn_r2, tree_r2])
     weights = r2s / r2s.sum()
     print("Ensemble weights:", dict(
         TabPFN=weights[0],
-        Tree=weights[1]
-        # TabNet=weights[2]
+        Tree=weights[1],
+        TabNet=weights[2]
     ))
 
     # 3) Load the trained model objects
     models = [
         load_model(Path(tabpfn_path)),
-        load_model(Path(tree_path))
-        # load_model(Path(tabnet_path))
+        load_model(Path(tree_path)),
+        load_model(Path(tabnet_path))
     ]
 
     # 4) Build ensemble and save
