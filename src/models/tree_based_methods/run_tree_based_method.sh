@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --job-name=final-model-train             # name shown by squeue
-#SBATCH --partition=dllabdlc_gpu-rtx2080         # adjust if CPU queue is better
-#SBATCH --gres=gpu:1                             # GPU not strictly required but harmless
+#SBATCH --job-name=single-fold-train          # name shown by squeue
+#SBATCH --partition=dllabdlc_gpu-rtx2080       # adjust if CPU queue is better
+#SBATCH --gres=gpu:1                           # GPU not strictly required but harmless
 #SBATCH --mem=40G
-#SBATCH --time=04:00:00                          # hh:mm:ss
+#SBATCH --time=04:00:00                        # hh:mm:ss
 #SBATCH --output=slurm-%j.out
 #SBATCH --error=slurm-%j.err
 
@@ -23,16 +23,20 @@ print("GPU count      :", torch.cuda.device_count())
 print("GPU name       :", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "n/a")
 PY
 
-# ── set the dataset directory and output directory ─────────────────────
-DATASET_DIR="/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/data/bike_sharing_demand"
-OUTPUT_DIR="/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/models/tree_based_methods_output/bike_sharing_demand"
+# ── set the paths for this fold ──────────────────────────────────────
+FOLD_DIR="/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/data/exam_dataset/1"
+X_TRAIN="$FOLD_DIR/X_train.parquet"
+Y_TRAIN="$FOLD_DIR/y_train.parquet"
+X_TEST="$FOLD_DIR/X_test.parquet"
 
-# ── train the final model on all splits ───────────────────────────────
-echo "Training final model on all splits"
-echo ">> Listing splits in DATASET_DIR (${DATASET_DIR}):"
-ls -d "${DATASET_DIR}"/* || echo "  (no dirs found)"
-python src/models/tree_based_methods/auto_ml_pipeline_project/final_train.py \
-  --dataset_path "${DATASET_DIR}" \
-  --output_dir "${OUTPUT_DIR}"
+OUTPUT_DIR="/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/models/tree_based_methods_output/exam"
 
-echo "Done. Final model and metrics can be found in ${OUTPUT_DIR}"
+# ── train the model on this fold ─────────────────────────────────────
+echo "Training model on fold": "$FOLD_DIR"
+python src/models/tree_based_methods/auto_ml_pipeline_project/main.py \
+  --X_train "$X_TRAIN" \
+  --y_train "$Y_TRAIN" \
+  --X_test "$X_TEST" \
+  --output_dir "$OUTPUT_DIR"
+
+echo "Done. Model and metrics in $OUTPUT_DIR"

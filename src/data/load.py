@@ -169,3 +169,24 @@ if __name__ == "__main__":
     # Full test (if you need it)
     X_full_te, y_full_te = load_full_test_for_specific_dataset(ds)
     print("Full test shape:", X_full_te.shape, y_full_te.shape)
+
+def load_only_train_for_dataset(
+    dataset: str,
+    data_root: Path = DATA_ROOT
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Concatenate X_train & y_train across ALL folds into one big training set,
+    WITHOUT ever accessing the test files.
+    Returns: (X_full_train, y_full_train)
+    """
+    X_parts, y_parts = [], []
+    for fold in get_available_folds(dataset, data_root):
+        # read only the training files
+        X_tr = pd.read_parquet(_build_path(dataset, fold, "X_train.parquet", data_root))
+        y_tr = pd.read_parquet(_build_path(dataset, fold, "y_train.parquet", data_root))
+        X_parts.append(X_tr)
+        y_parts.append(y_tr)
+    X_full = pd.concat(X_parts, ignore_index=True)
+    y_full = pd.concat(y_parts, ignore_index=True)
+    return X_full, y_full
+    
