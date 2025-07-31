@@ -19,6 +19,7 @@ def to_numpy_float32(x):
         return x.astype(np.float32).values
     return np.array(x).astype(np.float32)
 
+
 #-----------------------------
 # Objective function for Optuna hyperparameter optimization
 #-----------------------------
