@@ -32,7 +32,7 @@ def parse_args():
     return parser.parse_args()
 
 def tree_based_methods_model(dataset_path: str, output_dir: str):
-    """
+    """on
     Train and save the best tree-based model on the full training data.
 
     Args:

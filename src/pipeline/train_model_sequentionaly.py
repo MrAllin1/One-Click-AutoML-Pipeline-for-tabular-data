@@ -9,7 +9,7 @@ import joblib
 
 from models.bootstrap_tabpfn.bootstrap_tabpfn_train import train_bootstrap
 from models.tree_based_methods.auto_ml_pipeline_project.final_train import tree_based_methods_model
-from models.tabnet.tabnet_pipeline import tabnet_final_pipeline
+# from models.tabnet.tabnet_pipeline import tabnet_final_pipeline
 
 def _device() -> str:
     if torch.cuda.is_available():
@@ -49,13 +49,15 @@ def load_model(path: Path):
 
 def train_and_ensemble(dataset: Path, output_dir: Path, seed: int = 1):
     # 1) Train each model and capture paths + R²
+    print("Started with tree base")
+    tree_path, tree_r2 = tree_based_methods_model(
+        str(dataset), str(output_dir))
+    print(f"Tree-based → {tree_path} (R²={tree_r2:.4f})")
+    
     tabpfn_path, tabpfn_r2 = train_bootstrap(
         str(dataset), output_dir=output_dir, seed=seed,use_optuna=True, n_trials=50,fold=1)
     print(f"TabPFN Ensemble → {tabpfn_path} (R²={tabpfn_r2:.4f})")
 
-    tree_path, tree_r2 = tree_based_methods_model(
-        str(dataset), str(output_dir))
-    print(f"Tree-based → {tree_path} (R²={tree_r2:.4f})")
 
     # tabnet_path, tabnet_r2 = tabnet_final_pipeline(
     #     str(dataset), str(output_dir))
