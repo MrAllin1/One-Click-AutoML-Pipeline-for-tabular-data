@@ -19,6 +19,7 @@ import optuna
 from optuna.exceptions import TrialPruned
 from data import simulate_exam_dataset, get_test_data
 from .bootstrap_ensemble import EnsemblePFN
+from . import config
 
 # ─── Logging setup ────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -40,12 +41,12 @@ def _device() -> str:
 def train_bootstrap(
     dataset: str,
     output_dir: Path,
-    n_bootstrap: int = 10,
-    sample_frac: float = 0.8,
-    seed: int = 0,
-    fold: int = 1,
-    use_optuna: bool = False,
-    n_trials: int = 10,
+    n_bootstrap: int = config.n_bootstrap_default,
+    sample_frac: float = config.sample_frac_default,
+    seed: int = config.seed_default,
+    fold: int = config.fold_default,
+    use_optuna: bool = config.use_optuna_default,
+    n_trials: int = config.optuna_n_trials_default,
 ) -> tuple[Path, float]:
     """
     Performs bootstrap ensemble training or Optuna-tuned training.
@@ -53,19 +54,19 @@ def train_bootstrap(
     """
     if use_optuna:
         def objective(trial):
-            n_bs = trial.suggest_int("n_bootstrap", 5, 30)
-            frac = trial.suggest_float("sample_frac", 0.6, 0.9)
+            n_bs = trial.suggest_int("n_bootstrap", *config.tpfn_range_n_bootstrap)
+            frac = trial.suggest_float("sample_frac", *config.tpfn_range_sample_frac)
             logger.info(f"🔍 Trial {trial.number}: n_bootstrap={n_bs}, sample_frac={frac:.2f}")
             return _optuna_inner_objective(dataset, seed, fold, n_bs, frac, trial)
 
         pruner = optuna.pruners.MedianPruner(
-            n_startup_trials=3,
-            n_warmup_steps=0,
-            interval_steps=1
+            n_startup_trials=config.optuna_pruner_n_startup,
+            n_warmup_steps=config.optuna_pruner_warmup,
+            interval_steps=config.optuna_pruner_interval
         )
         study = optuna.create_study(
-            direction="maximize",
-            sampler=optuna.samplers.TPESampler(seed=seed),
+            direction=config.optuna_direction,
+            sampler=optuna.samplers.TPESampler(seed=config.optuna_sampler_seed),
             pruner=pruner
         )
         study.optimize(objective, n_trials=n_trials)
@@ -93,7 +94,7 @@ def train_bootstrap(
 
     # TensorBoard
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    writer = SummaryWriter(log_dir=str(output_dir / "runs" / ts))
+    writer = SummaryWriter(log_dir=str(output_dir / config.tensorboard_runs_dir / ts))
     logger.info(f"Bootstrap training → dataset={ds_name}, device={device}")
 
     # Load one fold (train only)
@@ -208,13 +209,13 @@ def _optuna_inner_objective(dataset, seed, fold, n_bootstrap, sample_frac, trial
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description="Bootstrap-bagging TabPFN with Optuna pruning")
     p.add_argument("-d", "--dataset",      required=True, help="Dataset root folder")
-    p.add_argument("-o", "--out-dir",      default="models", help="Output directory")
-    p.add_argument("--n-bootstrap", type=int, default=10,   help="Number of bootstraps (manual mode)")
-    p.add_argument("--sample-frac", type=float, default=0.8, help="Sample fraction (manual mode)")
-    p.add_argument("--seed",        type=int, default=0,     help="Random seed")
-    p.add_argument("--fold",        type=int, default=None,  help="Which fold to use (overrides random)")
-    p.add_argument("--optuna",      action="store_true",     help="Enable Optuna Bayesian search")
-    p.add_argument("--n-trials",    type=int, default=10,    help="Number of Optuna trials (when --optuna)")
+    p.add_argument("-o", "--out-dir",      default=config.out_dir_default, help="Output directory")
+    p.add_argument("--n-bootstrap", type=int, default=config.n_bootstrap_default,   help="Number of bootstraps (manual mode)")
+    p.add_argument("--sample-frac", type=float, default=config.sample_frac_default, help="Sample fraction (manual mode)")
+    p.add_argument("--seed",        type=int, default=config.seed_default,     help="Random seed")
+    p.add_argument("--fold",        type=int, default=config.fold_default,  help="Which fold to use (overrides random)")
+    p.add_argument("--optuna",      action="store_true", default=config.use_optuna_default,     help="Enable Optuna Bayesian search")
+    p.add_argument("--n-trials",    type=int, default=config.optuna_n_trials_default,    help="Number of Optuna trials (when --optuna)")
 
     args = p.parse_args()
     out = Path(args.out_dir)

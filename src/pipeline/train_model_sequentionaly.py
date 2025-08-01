@@ -65,6 +65,12 @@ def load_model(path: Path):
 
 def train_and_ensemble(dataset: Path, output_dir: Path, seed: int = 1):
     logger.info("Using device: %s", _device())
+    # 3) TabPFN model
+    logger.info("Training TabPFN model...")
+    tabpfn_path, tabpfn_r2 = train_bootstrap(
+        str(dataset), output_dir=output_dir
+    )
+    logger.info("TabPFN →      %s (R²=%.4f)", tabpfn_path, tabpfn_r2)
 
     # 1) Tree-based model
     logger.info("Training tree-based model...")
@@ -78,18 +84,9 @@ def train_and_ensemble(dataset: Path, output_dir: Path, seed: int = 1):
     tabnet_dir = output_dir / "tabnet"
     tabnet_dir.mkdir(parents=True, exist_ok=True)
     tabnet_path, tabnet_r2 = tabnet_model(
-        str(dataset), str(tabnet_dir),
-        n_splits=2, n_trials=2, seed=seed
+        str(dataset), str(tabnet_dir)
     )
     logger.info("TabNet →      %s (mean R²=%.4f)", tabnet_path, tabnet_r2)
-
-    # 3) TabPFN model
-    logger.info("Training TabPFN model...")
-    tabpfn_path, tabpfn_r2 = train_bootstrap(
-        str(dataset), output_dir=output_dir, seed=seed,
-        use_optuna=True, n_trials=2, fold=1
-    )
-    logger.info("TabPFN →      %s (R²=%.4f)", tabpfn_path, tabpfn_r2)
 
     # 4) Compute normalized weights
     r2s = np.array([tabpfn_r2, tree_r2, tabnet_r2])
