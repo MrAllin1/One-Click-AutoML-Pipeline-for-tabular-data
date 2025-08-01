@@ -82,22 +82,30 @@ def load_fold(
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Load one specific fold.
-    Returns: (X_train, X_test, y_train, y_test)
+    Returns: (X_train, X_test, y_train, y_test).
+    If any of the expected files does not exist, returns an empty DataFrame for that component.
     """
-    files = {
+    components = {
         "X_train": "X_train.parquet",
         "X_test":  "X_test.parquet",
         "y_train": "y_train.parquet",
+        "y_test":  "y_test.parquet",
     }
-    paths = {k: _build_path(dataset, fold, fn, data_root) for k, fn in files.items()}
-    for k, p in paths.items():
-        if not p.exists():
-            raise FileNotFoundError(f"Missing {k} at {p}")
-    X_train = pd.read_parquet(paths["X_train"])
-    X_test  = pd.read_parquet(paths["X_test"])
-    y_train = pd.read_parquet(paths["y_train"])
-    y_test  = pd.read_parquet(paths["y_test"])
-    return X_train, X_test, y_train, y_test
+    data = {}
+    for name, fname in components.items():
+        path = _build_path(dataset, fold, fname, data_root)
+        if path.exists():
+            try:
+                data[name] = pd.read_parquet(path)
+            except Exception as e:
+                logger.warning(f"Failed to read {name} from {path}: {e}")
+                data[name] = pd.DataFrame()
+        else:
+            logger.warning(f"{name} not found at {path}, returning empty DataFrame")
+            data[name] = pd.DataFrame()
+
+    return data["X_train"], data["X_test"], data["y_train"], data["y_test"]
+
 
 def load_all_folds(
     dataset: str,
