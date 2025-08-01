@@ -4,7 +4,7 @@ import pickle
 import logging
 import sys
 from pathlib import Path
-
+from pytorch_tabnet.tab_model import TabNetRegressor
 import numpy as np
 import torch
 import joblib
@@ -38,13 +38,27 @@ class WeightedEnsemble:
 
 def load_model(path: Path):
     """
-    Load a model by file extension (.pkl/.joblib via joblib, .pt/.pth via torch).
+    Load a model by file extension (.pkl/.joblib via joblib,
+    .pt/.pth via torch, TabNet .zip via TabNetRegressor.load_model).
     """
+    # If they passed a directory, look inside for a .zip
+    if path.is_dir():
+        zips = list(path.rglob("*.zip"))
+        if not zips:
+            raise FileNotFoundError(f"No TabNet .zip in {path}")
+        path = zips[0]   # take the first one you find
+
     ext = path.suffix.lower()
     if ext in {'.pkl', '.joblib'}:
         return joblib.load(path)
     if ext in {'.pt', '.pth'}:
         return torch.load(path, map_location='cpu')
+    if ext == '.zip':
+        # load a PyTorch-TabNet model
+        model = TabNetRegressor()
+        model.load_model(str(path))
+        return model
+
     # fallback
     return joblib.load(path)
 
