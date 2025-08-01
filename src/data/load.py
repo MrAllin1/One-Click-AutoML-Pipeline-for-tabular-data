@@ -88,7 +88,6 @@ def load_fold(
         "X_train": "X_train.parquet",
         "X_test":  "X_test.parquet",
         "y_train": "y_train.parquet",
-        "y_test":  "y_test.parquet",
     }
     paths = {k: _build_path(dataset, fold, fn, data_root) for k, fn in files.items()}
     for k, p in paths.items():

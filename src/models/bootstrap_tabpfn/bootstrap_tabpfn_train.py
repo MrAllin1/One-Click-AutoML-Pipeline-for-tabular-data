@@ -17,7 +17,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 import optuna
 from optuna.exceptions import TrialPruned
-from data import simulate_exam_dataset, get_test_data
+from data import load_full_train_for_specific_dataset, get_test_data
 from .bootstrap_ensemble import EnsemblePFN
 from . import config
 
@@ -98,7 +98,7 @@ def train_bootstrap(
     logger.info(f"Bootstrap training → dataset={ds_name}, device={device}")
 
     # Load one fold (train only)
-    X_full, y_full, chosen_fold = simulate_exam_dataset(dataset, fold=fold)
+    X_full, y_full = load_full_train_for_specific_dataset(dataset)
     n_samples = len(X_full)
     sample_size = int(n_samples * sample_frac)
 
@@ -163,7 +163,7 @@ def train_bootstrap(
 
 
 def _optuna_inner_objective(dataset, seed, fold, n_bootstrap, sample_frac, trial):
-    X_full, y_full, _ = simulate_exam_dataset(dataset, fold=fold)
+    X_full, y_full, _ = load_full_train_for_specific_dataset(dataset)
     n_samples = len(X_full)
     sample_size = int(n_samples * sample_frac)
     oob_preds = defaultdict(list)
