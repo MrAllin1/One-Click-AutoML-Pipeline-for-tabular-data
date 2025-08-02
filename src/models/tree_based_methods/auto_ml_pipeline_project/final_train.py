@@ -43,7 +43,7 @@ def tree_based_methods_model(dataset_path: str, output_dir: str):
     logging.info("Output directory '%s' is ready and logging is configured.", output_dir)
 
     ds_name = Path(dataset_path).name
-    tb_log_dir = output_dir / tb_log_subdir / ds_name / datetime.now().strftime("%Y%m%d_%H%M%S")
+    tb_log_dir = output_dir / tb_log_subdir / ds_name / "tree_based_methods" / datetime.now().strftime("%Y%m%d_%H%M%S")
     writer = SummaryWriter(log_dir=str(tb_log_dir))
 
     # 2) load and merge all train splits

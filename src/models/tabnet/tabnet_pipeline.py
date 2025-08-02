@@ -29,7 +29,7 @@ def tabnet_model(
 
     # build TB log path from config
     ds_name = Path(dataset_path).name
-    tb_dir = output_dir / config.tb_log_subdir / ds_name / datetime.now().strftime("%Y%m%d_%H%M%S")
+    tb_dir = output_dir / config.tb_log_subdir / ds_name / "tabnet" / datetime.now().strftime("%Y%m%d_%H%M%S")
     tb_dir.mkdir(parents=True, exist_ok=True)
     writer = SummaryWriter(log_dir=str(tb_dir))
 

@@ -55,7 +55,7 @@ def train_bootstrap(
     """
     ds_name = Path(dataset).name
     # build TensorBoard log path from config
-    tb_run_dir = output_dir / config.tb_log_subdir / ds_name / datetime.now().strftime("%Y%m%d_%H%M%S")
+    tb_run_dir = output_dir / config.tb_log_subdir / ds_name / "tabpfn" /  datetime.now().strftime("%Y%m%d_%H%M%S")
     tb_run_dir.mkdir(parents=True, exist_ok=True)
     writer = SummaryWriter(log_dir=str(tb_run_dir))
 
