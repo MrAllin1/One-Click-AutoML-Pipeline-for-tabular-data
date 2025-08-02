@@ -23,7 +23,7 @@ print("GPU name :", torch.cuda.get_device_name(0) if torch.cuda.is_available() e
 PY
 
 export DATASET_DIR="$PWD/data/bike_sharing_demand"
-export MODEL_DIR="$PWD/models"
+export MODEL_DIR="$PWD/modelsFinal"
 
 # run training (option A: direct script invocation)
 cd src/pipeline
@@ -31,4 +31,4 @@ python predict_with_final_model.py \
   --dataset $DATASET_DIR \
   --model-file $MODEL_DIR/final_model.pkl \
   --fold 1 \
-  --output $DATASET_DIR/y_pred.csv
+  --output $MODEL_DIR/y_pred.csv

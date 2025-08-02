@@ -118,7 +118,7 @@ def train_bootstrap(
         y_bs = y_full.iloc[idx].values.ravel()
 
         logger.info(f"[{i}/{n_bootstrap}] bootstrap sample size={sample_size}")
-        agent = TabPFNRegressor(device=device)
+        agent = TabPFNRegressor(device=device,ignore_pretraining_limits=True)
         agent.fit(X_bs, y_bs)
 
         if oob_mask.any():
@@ -163,7 +163,7 @@ def train_bootstrap(
 
 
 def _optuna_inner_objective(dataset, seed, fold, n_bootstrap, sample_frac, trial):
-    X_full, y_full, _ = load_full_train_for_specific_dataset(dataset)
+    X_full, y_full = load_full_train_for_specific_dataset(dataset)
     n_samples = len(X_full)
     sample_size = int(n_samples * sample_frac)
     oob_preds = defaultdict(list)
@@ -177,7 +177,7 @@ def _optuna_inner_objective(dataset, seed, fold, n_bootstrap, sample_frac, trial
         oob_mask = np.ones(n_samples, dtype=bool)
         oob_mask[np.unique(idx)] = False
 
-        agent = TabPFNRegressor(device=device)
+        agent = TabPFNRegressor(device=device,ignore_pretraining_limits=True)
         agent.fit(X_full.iloc[idx], y_full.iloc[idx].values.ravel())
 
         if oob_mask.any():
