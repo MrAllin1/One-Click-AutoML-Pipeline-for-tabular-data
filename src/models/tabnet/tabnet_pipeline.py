@@ -36,7 +36,7 @@ def tabnet_model(
         "tabnet",
         datetime.now().strftime("%Y%m%d_%H%M%S"),
     )
-    tb_dir.mkdir(parents=True, exist_ok=True)
+    os.makedirs(tb_dir, exist_ok=True) 
     writer = SummaryWriter(log_dir=str(tb_dir))
 
     ds = Path(dataset_path).name
