@@ -1,13 +1,14 @@
+from datetime import datetime
+from pathlib import Path
+import joblib
+import optuna
 import numpy as np
 import pandas as pd
-from pathlib import Path
-from datetime import datetime
+from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 from sklearn.metrics import r2_score
+from torch.utils.tensorboard import SummaryWriter
 from pytorch_tabnet.tab_model import TabNetRegressor
-import optuna
-from sklearn.preprocessing import StandardScaler
-import joblib
 from . import config
 
 def to_numpy_float32(x):
@@ -58,25 +59,36 @@ def objective(trial, X_train, y_train, X_val, y_val):
         batch_size=config.batch_size,
         virtual_batch_size=config.virtual_batch_size,
         num_workers=config.num_workers,
-        drop_last=config.drop_last,     
+        drop_last=config.drop_last,
     )
 
     preds = clf.predict(X_val).ravel()
     return r2_score(y_val.ravel(), preds)
 
-def train_fold_with_optuna(X_tr, y_tr, X_val, y_val, fold_idx, output_dir, n_trials=config.n_trials):
+def train_fold_with_optuna(
+    X_tr, y_tr,
+    X_val, y_val,
+    fold_idx: int,
+    output_dir: str,
+    n_trials: int = config.n_trials,
+    tb_writer: SummaryWriter = None
+):
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Fold {fold_idx} started")
 
+    # prepare data
     X_train_np = to_numpy_float32(X_tr)
     X_val_np   = to_numpy_float32(X_val)
 
     scaler = StandardScaler()
     y_train_scaled = scaler.fit_transform(y_tr.values.reshape(-1, 1))
     y_val_scaled   = scaler.transform(y_val.values.reshape(-1, 1))
-    output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    joblib.dump(scaler, output_dir / f"scaler_fold{fold_idx}.pkl")
 
+    # ensure output dir and save scaler
+    out_dir = Path(output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    joblib.dump(scaler, out_dir / f"scaler_fold{fold_idx}.pkl")
+
+    # run Optuna HPO
     study = optuna.create_study(direction=config.direction)
     study.optimize(
         lambda trial: objective(trial, X_train_np, y_train_scaled, X_val_np, y_val_scaled),
@@ -86,6 +98,24 @@ def train_fold_with_optuna(X_tr, y_tr, X_val, y_val, fold_idx, output_dir, n_tri
     print(f"Best params for fold {fold_idx}: {study.best_params}")
     print(f"Best R² for fold {fold_idx}: {study.best_value:.4f}")
 
+    # log each trial’s R² and hparams
+    if tb_writer is not None:
+        for t in study.trials:
+            tb_writer.add_scalar(
+                f"TabNet/trial_r2_fold{fold_idx}", t.value, t.number
+            )
+            tb_writer.add_hparams(
+                t.params,
+                {"r2": t.value},
+                run_name=f"fold{fold_idx}_trial{t.number}"
+            )
+        tb_writer.add_text(
+            f"TabNet/fold{fold_idx}_best_params",
+            str(study.best_params),
+            fold_idx
+        )
+
+    # retrain with best params
     best = study.best_params
     clf = TabNetRegressor(
         n_d=best['n_d'],
@@ -109,16 +139,27 @@ def train_fold_with_optuna(X_tr, y_tr, X_val, y_val, fold_idx, output_dir, n_tri
         drop_last=config.drop_last,
     )
 
+    # evaluate final fold
     val_preds_scaled = clf.predict(X_val_np).ravel()
     val_preds = scaler.inverse_transform(val_preds_scaled.reshape(-1, 1)).ravel()
     y_val_orig = scaler.inverse_transform(y_val_scaled).ravel()
     val_r2 = r2_score(y_val_orig, val_preds)
     print(f"Fold {fold_idx} final validation R²: {val_r2:.4f}")
 
-    clf.save_model(str(output_dir / f"tabnet_fold{fold_idx}"))
-    print(f"Saved fold {fold_idx} model to {output_dir / f'tabnet_fold{fold_idx}'}")
+    # log final R² for this fold
+    if tb_writer is not None:
+        tb_writer.add_scalar(
+            f"TabNet/final_val_r2_fold{fold_idx}",
+            val_r2,
+            fold_idx
+        )
+
+    # save model
+    clf.save_model(str(out_dir / f"tabnet_fold{fold_idx}"))
+    print(f"Saved fold {fold_idx} model to {out_dir / f'tabnet_fold{fold_idx}'}")
 
     return val_r2, study.best_params
+
 
 def main(dataset_dir, output_dir, n_splits=config.n_splits, n_trials=config.n_trials):
     dataset_dir = Path(dataset_dir)

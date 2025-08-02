@@ -3,6 +3,7 @@
 # Paths
 train_dir = "path/to/train_dataset"
 test_dir = "path/to/test_dataset"
+tb_log_subdir = "tensorboard_logs"
 
 # Output locations\ nmodel_dir = "models/tabnet_ensemble"
 ensemble_predictions = "models/exam_output/y_pred.csv"

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 import subprocess
 import os
@@ -8,7 +9,9 @@ from .tabnet_ensembling import main as _ensemble_main
 from data.load import load_only_train_for_dataset
 from pathlib import Path
 from sklearn.model_selection import KFold
+from torch.utils.tensorboard import SummaryWriter
 from . import config
+from datetime import datetime
 
 def tabnet_model(
     dataset_path: str,
@@ -18,10 +21,17 @@ def tabnet_model(
     seed: int = config.random_state
 ) -> Tuple[str, float]:
     """
-    Train TabNet via K-Fold + Optuna on merged splits, reporting progress via prints.
+    Train TabNet via K-Fold + Optuna on merged splits, reporting progress via prints
+    and logging metrics to TensorBoard in the directory specified by config.tb_log_subdir.
     """
     os.makedirs(output_dir, exist_ok=True)
     print(f"[INFO] Output directory '{output_dir}' ready.")
+
+    # build TB log path from config
+    ds_name = Path(dataset_path).name
+    tb_dir = output_dir / config.tb_log_subdir / ds_name / datetime.now().strftime("%Y%m%d_%H%M%S")
+    tb_dir.mkdir(parents=True, exist_ok=True)
+    writer = SummaryWriter(log_dir=str(tb_dir))
 
     ds = Path(dataset_path).name
     X_all, y_all = load_only_train_for_dataset(ds)
@@ -36,19 +46,31 @@ def tabnet_model(
 
         fold_dir = Path(output_dir) / f"fold{fold_idx}"
         os.makedirs(fold_dir, exist_ok=True)
-        val_r2, _ = train_fold_with_optuna(
+
+        val_r2, best_params = train_fold_with_optuna(
             X_tr, y_tr,
             X_val, y_val,
             fold_idx=fold_idx,
             output_dir=fold_dir,
-            n_trials=n_trials
+            n_trials=n_trials,
+            tb_writer=writer
         )
+
+        # log per-fold metrics
+        writer.add_scalar("TabNet/val_r2_per_fold", val_r2, fold_idx)
+        writer.add_text(f"TabNet/fold{fold_idx}_best_params", str(best_params), fold_idx)
+
         r2_scores.append(val_r2)
         print(f"[INFO] Fold {fold_idx} done. R²={val_r2:.4f}")
 
     mean_r2 = float(np.mean(r2_scores))
-    std_r2 = float(np.std(r2_scores))
+    std_r2  = float(np.std(r2_scores))
     print(f"[INFO] TabNet CV complete — mean R² = {mean_r2:.4f} ± {std_r2:.4f}")
+
+    # log overall summary
+    writer.add_scalar("TabNet/mean_r2", mean_r2, 0)
+    writer.add_scalar("TabNet/std_r2",  std_r2,  0)
+    writer.close()
 
     return output_dir, mean_r2
 
@@ -81,7 +103,7 @@ def run_prediction(dataset_path: str, model_dir: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Pipeline: Train TabNet with KFold + Ensemble Predict")
     parser.add_argument("--dataset_path", type=str, required=True, help="Path to dataset folder")
-    parser.add_argument("--output_dir", type=str, default=config.model_dir, help="Directory to save fold models")
+    parser.add_argument("--output_dir",   type=str, default=config.model_dir, help="Directory to save fold models")
     args = parser.parse_args()
 
     run_training(args.dataset_path, args.output_dir)

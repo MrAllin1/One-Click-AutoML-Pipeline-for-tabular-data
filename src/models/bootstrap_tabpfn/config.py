@@ -2,7 +2,7 @@
 
 # Output paths
 out_dir_default         = "models/tabpfn"
-tensorboard_runs_dir    = "runs/tabpfn"
+tb_log_subdir = "tensorboard_logs"
 
 # Bootstrap sampling
 n_bootstrap_default     = 30

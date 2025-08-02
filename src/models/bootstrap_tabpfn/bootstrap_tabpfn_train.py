@@ -51,13 +51,29 @@ def train_bootstrap(
     """
     Performs bootstrap ensemble training or Optuna-tuned training.
     Returns final ensemble path and OOB R².
+    Logs OOB R² per iteration and timing to TensorBoard.
     """
+    ds_name = Path(dataset).name
+    # build TensorBoard log path from config
+    tb_run_dir = output_dir / config.tb_log_subdir / ds_name / datetime.now().strftime("%Y%m%d_%H%M%S")
+    tb_run_dir.mkdir(parents=True, exist_ok=True)
+    writer = SummaryWriter(log_dir=str(tb_run_dir))
+
+    # record static params
+    writer.add_text("TabPFN/params", f"n_bootstrap={n_bootstrap}, sample_frac={sample_frac}, seed={seed}", 0)
+
     if use_optuna:
+        # log Optuna trials too
         def objective(trial):
             n_bs = trial.suggest_int("n_bootstrap", *config.tpfn_range_n_bootstrap)
             frac = trial.suggest_float("sample_frac", *config.tpfn_range_sample_frac)
             logger.info(f"🔍 Trial {trial.number}: n_bootstrap={n_bs}, sample_frac={frac:.2f}")
-            return _optuna_inner_objective(dataset, seed, fold, n_bs, frac, trial)
+            oob_r2 = _optuna_inner_objective(dataset, seed, fold, n_bs, frac, trial)
+            # log each trial's intermediate R² on TensorBoard
+            writer.add_scalar("TabPFN/optuna_oob_r2", oob_r2, trial.number)
+            writer.add_hparams({"n_bootstrap": n_bs, "sample_frac": frac}, {"oob_r2": oob_r2},
+                               run_name=f"trial{trial.number}")
+            return oob_r2
 
         pruner = optuna.pruners.MedianPruner(
             n_startup_trials=config.optuna_pruner_n_startup,
@@ -73,8 +89,11 @@ def train_bootstrap(
 
         best = study.best_params
         logger.info(f"🏆 Best Params: {best}, R²={study.best_value:.5f}")
+        writer.add_text("TabPFN/optuna_best_params", str(best), 0)
+        writer.add_scalar("TabPFN/optuna_best_oob_r2", study.best_value, 0)
 
-        # Retrain final ensemble with best params
+        writer.close()
+        # Retrain final ensemble with best params (calls this function without Optuna)
         return train_bootstrap(
             dataset=dataset,
             output_dir=output_dir,
@@ -85,31 +104,28 @@ def train_bootstrap(
             use_optuna=False
         )
 
-    # Manual training below (no Optuna)
+    # ── Manual bootstrap loop ───────────────────────────────────────────────────
     start_time = time.time()
     device = _device()
-    ds_name = Path(dataset).name
     outdir = output_dir / ds_name
     outdir.mkdir(parents=True, exist_ok=True)
 
-    # TensorBoard
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    writer = SummaryWriter(log_dir=str(output_dir / config.tensorboard_runs_dir / ts))
     logger.info(f"Bootstrap training → dataset={ds_name}, device={device}")
 
-    # Load one fold (train only)
+    # Load full training data
     X_full, y_full = load_full_train_for_specific_dataset(dataset)
     n_samples = len(X_full)
     sample_size = int(n_samples * sample_frac)
 
-    # Storage
     oob_preds = defaultdict(list)
     model_paths: list[Path] = []
 
     for i in range(1, n_bootstrap + 1):
+        iter_start = time.time()
         np.random.seed(seed + i)
         torch.manual_seed(seed + i)
 
+        # sample and fit
         idx = np.random.choice(n_samples, size=sample_size, replace=True)
         oob_mask = np.ones(n_samples, dtype=bool)
         oob_mask[np.unique(idx)] = False
@@ -118,26 +134,38 @@ def train_bootstrap(
         y_bs = y_full.iloc[idx].values.ravel()
 
         logger.info(f"[{i}/{n_bootstrap}] bootstrap sample size={sample_size}")
-        agent = TabPFNRegressor(device=device,ignore_pretraining_limits=True)
+        agent = TabPFNRegressor(device=device, ignore_pretraining_limits=True)
         agent.fit(X_bs, y_bs)
 
+        # collect OOB preds
         if oob_mask.any():
             X_oob = X_full[oob_mask]
             pred_oob = agent.predict(X_oob)
             for row_idx, p in zip(np.where(oob_mask)[0], pred_oob):
                 oob_preds[row_idx].append(p)
 
+        # save model
         out_path = outdir / f"bootstrap_{i}.pkl"
         with open(out_path, "wb") as f:
             pickle.dump(agent, f)
         model_paths.append(out_path)
         logger.info(f"Saved model → {out_path}")
 
+        # compute intermediate OOB R²
+        if oob_preds:
+            used = np.array(list(oob_preds.keys()), dtype=int)
+            y_t = y_full.values.ravel()[used]
+            preds = np.array([np.mean(oob_preds[idx0]) for idx0 in used])
+            intermediate_r2 = r2_score(y_t, preds)
+            # log to TensorBoard
+            writer.add_scalar("TabPFN/oob_r2_iter", intermediate_r2, i)
+            writer.add_scalar("TabPFN/iter_time_s", time.time() - iter_start, i)
+
         del agent
         if device == "cuda":
             torch.cuda.empty_cache()
 
-    # Compute final OOB R²
+    # ── Final OOB R² and ensemble saving ────────────────────────────────────────
     final_preds = np.zeros(n_samples)
     used = np.zeros(n_samples, dtype=bool)
     for idx0, preds in oob_preds.items():
@@ -149,13 +177,25 @@ def train_bootstrap(
     oob_r2 = r2_score(y_true, y_pred)
 
     logger.info(f"📊 Final OOB R² = {oob_r2:.5f}")
-    writer.add_scalar("R2_score/OOB", oob_r2, 0)
+    writer.add_scalar("TabPFN/final_oob_r2", oob_r2, 0)
 
+    # build ensemble
     ensemble = EnsemblePFN(model_paths)
     ens_path = outdir / "ensemble.pkl"
     with open(ens_path, "wb") as f:
         pickle.dump(ensemble, f)
     logger.info(f"Saved ensemble → {ens_path}")
+
+    # optional test-set evaluation
+    try:
+        X_test, y_test = get_test_data(dataset)
+        y_test_pred = ensemble.predict(X_test)
+        test_r2 = r2_score(y_test, y_test_pred)
+        writer.add_scalar("TabPFN/test_r2", test_r2, 0)
+        writer.add_histogram("TabPFN/test_pred_dist", y_test_pred, 0)
+        logger.info(f"Test R² = {test_r2:.4f}")
+    except Exception:
+        logger.warning("get_test_data failed or unavailable; skipping test R² logging")
 
     writer.close()
     logger.info(f"Total time: {time.time() - start_time:.1f}s")
@@ -177,7 +217,7 @@ def _optuna_inner_objective(dataset, seed, fold, n_bootstrap, sample_frac, trial
         oob_mask = np.ones(n_samples, dtype=bool)
         oob_mask[np.unique(idx)] = False
 
-        agent = TabPFNRegressor(device=device,ignore_pretraining_limits=True)
+        agent = TabPFNRegressor(device=device, ignore_pretraining_limits=True)
         agent.fit(X_full.iloc[idx], y_full.iloc[idx].values.ravel())
 
         if oob_mask.any():
@@ -210,12 +250,12 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser(description="Bootstrap-bagging TabPFN with Optuna pruning")
     p.add_argument("-d", "--dataset",      required=True, help="Dataset root folder")
     p.add_argument("-o", "--out-dir",      default=config.out_dir_default, help="Output directory")
-    p.add_argument("--n-bootstrap", type=int, default=config.n_bootstrap_default,   help="Number of bootstraps (manual mode)")
-    p.add_argument("--sample-frac", type=float, default=config.sample_frac_default, help="Sample fraction (manual mode)")
-    p.add_argument("--seed",        type=int, default=config.seed_default,     help="Random seed")
-    p.add_argument("--fold",        type=int, default=config.fold_default,  help="Which fold to use (overrides random)")
-    p.add_argument("--optuna",      action="store_true", default=config.use_optuna_default,     help="Enable Optuna Bayesian search")
-    p.add_argument("--n-trials",    type=int, default=config.optuna_n_trials_default,    help="Number of Optuna trials (when --optuna)")
+    p.add_argument("--n-bootstrap", type=int, default=config.n_bootstrap_default,   help="Number of bootstraps")
+    p.add_argument("--sample-frac", type=float, default=config.sample_frac_default, help="Sample fraction")
+    p.add_argument("--seed",        type=int, default=config.seed_default,          help="Random seed")
+    p.add_argument("--fold",        type=int, default=config.fold_default,          help="Fold index")
+    p.add_argument("--optuna",      action="store_true", default=config.use_optuna_default, help="Enable Optuna")
+    p.add_argument("--n-trials",    type=int, default=config.optuna_n_trials_default,   help="Optuna trials")
 
     args = p.parse_args()
     out = Path(args.out_dir)
