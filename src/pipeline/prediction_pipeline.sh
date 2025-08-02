@@ -22,7 +22,7 @@ print("GPU count:", torch.cuda.device_count())
 print("GPU name :", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "n/a")
 PY
 
-export DATASET_DIR="$PWD/data/bike_sharing_demand"
+export DATASET_DIR="$PWD/data/exam_dataset"
 export MODEL_DIR="$PWD/modelsFinal"
 
 # run training (option A: direct script invocation)
