@@ -31,11 +31,11 @@ def parse_args():
                         help="Directory to save the final model, report, and TensorBoard logs.")
     return parser.parse_args()
 
-
 def tree_based_methods_model(dataset_path: str, output_dir: str):
     """
     Train and save the best tree-based model on the full training data,
-    logging validation R² for each candidate and retrain time.
+    logging each candidate’s validation R² as a continuous curve,
+    plus the selected model’s params, R², and retrain time to TensorBoard.
     """
     # 1) prepare output, logging, and TensorBoard
     os.makedirs(output_dir, exist_ok=True)
@@ -84,18 +84,31 @@ def tree_based_methods_model(dataset_path: str, output_dir: str):
     report_results(val_metrics, output_dir)
     logging.info("Model selection complete. Validation metrics: %s", val_metrics)
 
-    # log each candidate's validation R²
-    for name, val_r2 in metrics.items():
-        writer.add_scalar(f"Tree/val_r2_{name}", val_r2, 0)
+    # 6) log each candidate's validation R² as a continuous curve
+    for idx, (name, val_r2) in enumerate(metrics.items(), start=1):
+        writer.add_scalar("Tree/val_r2", val_r2, idx)
 
-    # 6) choose best model
+    # 7) choose best model
     best_name = max(metrics, key=metrics.get)
     best_r2 = metrics[best_name]
     logging.info("Selected best model '%s' with validation R²=%.4f", best_name, best_r2)
+
+    # Log HParams: best model’s parameters vs. its validation R²
+    best_model = models[best_name]
+    model_params = (best_model.get_params() 
+                    if not isinstance(best_model, EnsembleModel) 
+                    else {**best_model.m1.get_params(), **best_model.m2.get_params()})
+    writer.add_hparams(
+        model_params,
+        {"val_r2": best_r2},
+        run_name=best_name
+    )
+
+    # Also log selected-model name & R² as scalars/text
     writer.add_text("Tree/selected_model", best_name, 0)
     writer.add_scalar("Tree/selected_model_r2", best_r2, 0)
 
-    # 7) retrain best on 100% data, timing it
+    # 8) retrain best on 100% data, timing it
     logging.info("Retraining best model '%s' on full dataset", best_name)
     retrain_start = time.time()
     X_full_fe, _ = engineer_features(X_all, X_all.copy())
@@ -112,7 +125,7 @@ def tree_based_methods_model(dataset_path: str, output_dir: str):
     logging.info("Retraining completed in %.2fs", retrain_time)
     writer.add_scalar("Tree/retrain_time_s", retrain_time, 0)
 
-    # 8) save final model
+    # 9) save final model
     model_filename = f"final_{best_name}.pkl"
     model_path = os.path.join(output_dir, model_filename)
     save_model(final_model, model_path)
@@ -120,6 +133,7 @@ def tree_based_methods_model(dataset_path: str, output_dir: str):
 
     writer.close()
     return model_path, best_r2
+
 
 
 def main():

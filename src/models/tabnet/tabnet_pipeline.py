@@ -61,11 +61,6 @@ def tabnet_model(
             n_trials=n_trials,
             tb_writer=writer
         )
-
-        # log per-fold metrics
-        writer.add_scalar("TabNet/val_r2_per_fold", val_r2, fold_idx)
-        writer.add_text(f"TabNet/fold{fold_idx}_best_params", str(best_params), fold_idx)
-
         r2_scores.append(val_r2)
         print(f"[INFO] Fold {fold_idx} done. R²={val_r2:.4f}")
 

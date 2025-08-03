@@ -98,21 +98,12 @@ def train_fold_with_optuna(
     print(f"Best params for fold {fold_idx}: {study.best_params}")
     print(f"Best R² for fold {fold_idx}: {study.best_value:.4f}")
 
-    # log each trial’s R² and hparams
+    # log only the best hyperparameters & its R² for this fold
     if tb_writer is not None:
-        for t in study.trials:
-            tb_writer.add_scalar(
-                f"TabNet/trial_r2_fold{fold_idx}", t.value, t.number
-            )
-            tb_writer.add_hparams(
-                t.params,
-                {"r2": t.value},
-                run_name=f"fold{fold_idx}_trial{t.number}"
-            )
-        tb_writer.add_text(
-            f"TabNet/fold{fold_idx}_best_params",
-            str(study.best_params),
-            fold_idx
+        tb_writer.add_hparams(
+            study.best_params,
+            {"final_r2": study.best_value},
+            run_name=f"fold{fold_idx}_best"
         )
 
     # retrain with best params
@@ -146,13 +137,9 @@ def train_fold_with_optuna(
     val_r2 = r2_score(y_val_orig, val_preds)
     print(f"Fold {fold_idx} final validation R²: {val_r2:.4f}")
 
-    # log final R² for this fold
+    # log final R² for this fold (scalar only)
     if tb_writer is not None:
-        tb_writer.add_scalar(
-            f"TabNet/final_val_r2_fold{fold_idx}",
-            val_r2,
-            fold_idx
-        )
+        tb_writer.add_scalar("TabNet/final_val_r2", val_r2, fold_idx)
 
     # save model
     clf.save_model(str(out_dir / f"tabnet_fold{fold_idx}"))
@@ -161,23 +148,49 @@ def train_fold_with_optuna(
     return val_r2, study.best_params
 
 
+
 def main(dataset_dir, output_dir, n_splits=config.n_splits, n_trials=config.n_trials):
     dataset_dir = Path(dataset_dir)
     output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Load data
     X = pd.read_parquet(dataset_dir / "X_train.parquet")
     y = pd.read_parquet(dataset_dir / "y_train.parquet")
 
+    # Single TensorBoard writer for all folds + summary
+    run_dir = output_dir / "runs" / datetime.now().strftime("%Y%m%d_%H%M%S")
+    writer = SummaryWriter(log_dir=str(run_dir))
+
+    # K-Fold CV
     kf = KFold(n_splits=n_splits, shuffle=config.shuffle, random_state=config.random_state)
     r2_scores = []
 
     for fold_idx, (train_index, val_index) in enumerate(kf.split(X), start=1):
         X_tr, X_val = X.iloc[train_index], X.iloc[val_index]
         y_tr, y_val = y.iloc[train_index], y.iloc[val_index]
-        val_r2, best = train_fold_with_optuna(X_tr, y_tr, X_val, y_val, fold_idx, output_dir, n_trials)
+
+        # Pass the same writer into each fold
+        val_r2, best_params = train_fold_with_optuna(
+            X_tr,
+            y_tr,
+            X_val,
+            y_val,
+            fold_idx,
+            output_dir,
+            n_trials,
+            tb_writer=writer
+        )
         r2_scores.append(val_r2)
 
-    print(f"\nMean R² across {n_splits} folds: {np.mean(r2_scores):.4f} ± {np.std(r2_scores):.4f}")
+    # Aggregate and log overall summary
+    mean_r2 = float(np.mean(r2_scores))
+    std_r2  = float(np.std(r2_scores))
+    writer.add_scalar("TabNet/mean_r2", mean_r2, 0)
+    writer.add_scalar("TabNet/std_r2",  std_r2,  0)
+    writer.close()
+
+    print(f"\nMean R² across {n_splits} folds: {mean_r2:.4f} ± {std_r2:.4f}")
 
 if __name__ == "__main__":
     import argparse
