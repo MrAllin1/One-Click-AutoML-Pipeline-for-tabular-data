@@ -1,31 +1,40 @@
 #!/usr/bin/env python3
+"""
+Predict with the final_model.pkl ensemble, handling:
+  - Tree-based feature engineering (as in training)
+  - TabNet fold-wise prediction + inverse-scaling
+  - TabPFN direct prediction (no special FE)
+
+Prints every 100th sample’s per-model vs. ensemble output,
+then writes all ensemble predictions to CSV.
+"""
 import argparse
-import pickle
 import logging
+import pickle                              # <— needed for unpickling
 import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import joblib
+from catboost.core import CatBoostRegressor
 from pytorch_tabnet.tab_model import TabNetRegressor
 
-# Feature-engineering imported from training pipeline
-from models.tree_based_methods.auto_ml_pipeline_project.auto_ml_pipeline.feature_engineering import engineer_features
-# Use centralized data-layer methods
 from data import get_test_data
 from data.load import load_only_train_for_dataset
+from models.tree_based_methods.auto_ml_pipeline_project.auto_ml_pipeline.feature_engineering import engineer_features
 
 # ── LOGGER SETUP ───────────────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
-    format="[%(asctime)s] %(levelname)s: %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    stream=sys.stderr,
+    format='[%(asctime)s] [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    stream=sys.stderr
 )
 logger = logging.getLogger(__name__)
 
-# ── MUST match the training-time definition exactly ─────────────────────────────
+
+# ── MUST match the training‐time definition exactly ─────────────────────────────
 class WeightedEnsemble:
     """
     Wraps models supporting .predict(X) to return a weighted average of predictions.
@@ -36,121 +45,99 @@ class WeightedEnsemble:
         self.weights = w / w.sum()
 
     def predict(self, X):
+        # We won't actually use this—see below for per‐model logic.
         preds = [m.predict(X) for m in self.models]
-        return np.tensordot(self.weights, preds, axes=[0,0])
+        return np.tensordot(self.weights, preds, axes=[0, 0])
+
+
+def load_tabnet_fold_preds(tabnet_root: Path, X_np: np.ndarray) -> np.ndarray:
+    """
+    For each fold directory under tabnet_root:
+      1) load its StandardScaler,
+      2) load its TabNet zip,
+      3) predict on X_np,
+      4) inverse‐transform,
+    then return the mean across folds.
+    """
+    preds = []
+    for fold_dir in sorted(tabnet_root.iterdir()):
+        if not fold_dir.is_dir() or not fold_dir.name.startswith("fold"):
+            continue
+        scaler = joblib.load(fold_dir / f"scaler_{fold_dir.name}.pkl")
+        zip_files = list(fold_dir.glob("*.zip"))
+        model_file = zip_files[0]
+        tb = TabNetRegressor()
+        tb.load_model(str(model_file))
+        raw = tb.predict(X_np).ravel()
+        preds.append(scaler.inverse_transform(raw.reshape(-1, 1)).ravel())
+    return np.mean(preds, axis=0)
+
 
 def main():
-    p = argparse.ArgumentParser(description="Predict using the trained ensemble model")
-    p.add_argument("--dataset",    required=True,
-                   help="Name of dataset (folder under data/) to load")
-    p.add_argument("--fold",       type=int, default=None,
-                   help="Fold number for get_test_data (optional)")
-    p.add_argument("--model-dir",  required=True,
-                   help="Directory containing final_model.pkl and related artifacts")
-    p.add_argument("--output",     default="ensemble_predictions.csv",
-                   help="CSV file to save ensemble predictions")
+    p = argparse.ArgumentParser(description="Predict with final ensemble")
+    p.add_argument("-d", "--dataset",   required=True, help="Path to dataset root")
+    p.add_argument("-m", "--model-file",required=True, help="Path to final_model.pkl")
+    p.add_argument("-f", "--fold",      type=int, default=None, help="Fold number for get_test_data")
+    p.add_argument("-o", "--output",    required=True, help="CSV file to save ensemble preds")
     args = p.parse_args()
 
-    # 1. Load ensemble
-    model_dir = Path(args.model_dir)
-    ensemble_path = model_dir / "final_model.pkl"
-    if not ensemble_path.exists():
-        logger.error("Ensemble model not found at %s", ensemble_path)
-        sys.exit(1)
+    # 1) load test set
+    logger.info(f"Loading X_test (fold {args.fold}) from {args.dataset}")
+    X_test = get_test_data(str(args.dataset), fold=args.fold)
 
-    # Now that WeightedEnsemble is defined in __main__, pickle.load will succeed
-    with open(ensemble_path, "rb") as f:
+    # 2) load training set (to drive FE)
+    ds_name = Path(args.dataset).name
+    X_train_full, _ = load_only_train_for_dataset(ds_name)
+    logger.info(f"Loaded full training data ({X_train_full.shape[0]} rows, {X_train_full.shape[1]} cols)")
+
+    # 3) engineer features exactly as in training
+    X_tr_fe, X_te_fe = engineer_features(X_train_full, X_test)
+
+    # 4) convert all categories → integer codes, then float32
+    for c in X_te_fe.select_dtypes(include="category"):
+        X_te_fe[c] = X_te_fe[c].cat.codes
+    X_te_fe = X_te_fe.astype(np.float32)
+
+    # 5) unpickle ensemble (uses the inline WeightedEnsemble above)
+    logger.info(f"Loading ensemble from {args.model_file}")
+    with open(args.model_file, "rb") as f:
         ensemble: WeightedEnsemble = pickle.load(f)
-    models = ensemble.models
-    weights = ensemble.weights
-    logger.info("Loaded ensemble with %d models", len(models))
 
-    # 2. Load full training data for feature engineering
-    try:
-        X_train_full, _ = load_only_train_for_dataset(args.dataset)
-        logger.info("Loaded full training data: %d samples, %d features",
-                    X_train_full.shape[0], X_train_full.shape[1])
-    except Exception as e:
-        logger.error("Failed to load training data: %s", e)
-        sys.exit(1)
-
-    # 3. Load test data via data layer
-    try:
-        X_test_raw = get_test_data(args.dataset, fold=args.fold)
-        logger.info("Loaded test data: %d samples, %d features",
-                    X_test_raw.shape[0], X_test_raw.shape[1])
-    except Exception as e:
-        logger.error("Failed to load test data: %s", e)
-        sys.exit(1)
-
-    # 4. Basic imputation and outlier capping
-    X_test = X_test_raw.copy()
-    # Impute missing
-    for col in X_train_full.columns:
-        if X_test[col].isna().any():
-            if pd.api.types.is_numeric_dtype(X_train_full[col]):
-                fill = X_train_full[col].median()
-            else:
-                fill = X_train_full[col].mode().iloc[0]
-            X_test[col].fillna(fill, inplace=True)
-    # Cap outliers
-    for col in X_train_full.select_dtypes(include=[np.number]).columns:
-        lo, hi = X_train_full[col].quantile(0.01), X_train_full[col].quantile(0.99)
-        X_test[col] = X_test[col].clip(lo, hi)
-
-    # 5. Feature engineering for tree-based model
-    try:
-        _, X_test_fe = engineer_features(X_train_full, X_test.copy())
-        logger.info("Engineered tree-based features: %d cols", X_test_fe.shape[1])
-    except Exception as e:
-        logger.error("Feature engineering failed: %s", e)
-        sys.exit(1)
-
-    # 6. Prepare numpy array for TabNet/TabPFN
-    X_test_np = X_test.astype(np.float32).values
-
-    # 7. Generate per-model predictions
-    preds = []
-    for i, m in enumerate(models):
-        if i == 0:
-            # TabPFN: raw processed frame
-            try:
-                p_i = m.predict(X_test)
-            except:
-                p_i = m.predict(X_test_np)
-        elif i == 1:
-            # Tree-based: engineered features
-            try:
-                p_i = m.predict(X_test_fe)
-            except:
-                p_i = m.predict(X_test_fe.values)
-        elif i == 2:
-            # TabNet: numpy + inverse-scale
-            raw = m.predict(X_test_np).ravel()
-            # locate a scaler if present
-            scaler = None
-            s_files = list(model_dir.rglob("scaler_fold*.pkl"))
-            if s_files:
-                scaler = joblib.load(s_files[0])
-            p_i = scaler.inverse_transform(raw.reshape(-1,1)).ravel() if scaler else raw
+    # 6) assign human-readable names
+    names = []
+    for m in ensemble.models:
+        if isinstance(m, TabNetRegressor):
+            names.append("TabNet")
+        elif isinstance(m, CatBoostRegressor):
+            names.append("Tree")
         else:
-            # fallback
-            try:
-                p_i = m.predict(X_test)
-            except:
-                p_i = m.predict(X_test_np)
-        preds.append(np.array(p_i).ravel())
-        logger.info("Model %d predicted %d values", i, len(preds[-1]))
+            names.append("TabPFN")
 
-    # 8. Combine ensemble
-    P = np.vstack(preds)
-    y_ens = np.tensordot(weights, P, axes=[0,0])
-    logger.info("Combined predictions into ensemble of length %d", y_ens.shape[0])
+    # 7) per-model predictions
+    #    - TabPFN on raw X_test
+    pfn_preds  = np.asarray(ensemble.models[0].predict(X_test)).ravel()
+    #    - CatBoost on engineered X_te_fe
+    tree_preds = np.asarray(ensemble.models[1].predict(X_te_fe)).ravel()
+    #    - TabNet folds on the same engineered features
+    X_np = X_te_fe.values.astype(np.float32)
+    tabnet_root = Path(args.model_file).parent / "tabnet"
+    tabnet_preds = load_tabnet_fold_preds(tabnet_root, X_np)
 
-    # 9. Save
-    out_df = pd.DataFrame({"prediction": y_ens})
-    out_df.to_csv(args.output, index=False)
-    logger.info("Saved predictions to %s", args.output)
+    # 8) blend
+    mat = np.vstack([pfn_preds, tree_preds, tabnet_preds])      # shape = (3, n)
+    ens = ensemble.weights.dot(mat)                            # shape = (n,)
+
+    # 9) print every 100th
+    for i in range(0, len(ens), 100):
+        parts = [f"{names[j]}={mat[j,i]:.6f}" for j in range(3)]
+        parts.append(f"Ensemble={ens[i]:.6f}")
+        print(f"Sample {i}: " + ", ".join(parts))
+
+    # 10) save full results
+    logger.info(f"Saving predictions to {args.output}")
+    pd.DataFrame({"y_pred": ens}).to_csv(args.output, index=False)
+    print(f"Saved predictions to: {args.output}", file=sys.stdout)
+
 
 if __name__ == "__main__":
     main()

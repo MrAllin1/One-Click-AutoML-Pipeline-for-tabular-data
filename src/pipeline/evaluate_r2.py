@@ -35,4 +35,4 @@ def main(pred_path: str, true_path: str):
 
 
 if __name__ == "__main__":
-    main("/work/dlclarge2/alidemaa-dl_lab/automl/automl-exam-ss25-tabular-freiburg-template/modelsFinal-YProp/y_pred.csv", "/work/dlclarge2/alidemaa-dl_lab/automl/automl-exam-ss25-tabular-freiburg-template/data/yprop_4_1/11/y_test.parquet")
+    main("/work/dlclarge2/alidemaa-dl_lab/automl/automl-exam-ss25-tabular-freiburg-template/modelsFinal-YProp/y_predv2.csv", "/work/dlclarge2/alidemaa-dl_lab/automl/automl-exam-ss25-tabular-freiburg-template/data/yprop_4_1/11/y_test.parquet")

@@ -29,6 +29,6 @@ export MODEL_DIR="$PWD/modelsFinal-YProp"
 cd src/pipeline
 python predict_with_final_model.py \
   --dataset $DATASET_DIR \
-  --model-dir $MODEL_DIR \
+  --model-file $MODEL_DIR/final_model.pkl \
   --fold 11 \
   --output $MODEL_DIR/y_pred.csv
