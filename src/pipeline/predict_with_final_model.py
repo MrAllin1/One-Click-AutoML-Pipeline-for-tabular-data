@@ -1,189 +1,156 @@
 #!/usr/bin/env python3
-"""
-Script to load a weighted ensemble model and generate predictions on X_test via get_test_data,
-applying feature engineering only for the tree-based and TabNet submodels.
-Emits an INFO log every 100th sample showing each model's prediction and the final ensemble.
-"""
+import argparse
+import pickle
+import logging
 import sys
 from pathlib import Path
-import argparse
-import logging
-import joblib
+
 import numpy as np
 import pandas as pd
-import torch
+import joblib
 from pytorch_tabnet.tab_model import TabNetRegressor
-from catboost.core import CatBoostRegressor
 
-# ── ADD project’s src/ directory to PYTHONPATH ─────────────────────────────────
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-from data import get_test_data
+# Feature-engineering imported from training pipeline
 from models.tree_based_methods.auto_ml_pipeline_project.auto_ml_pipeline.feature_engineering import engineer_features
+# Use centralized data-layer methods
+from data import get_test_data
+from data.load import load_only_train_for_dataset
 
 # ── LOGGER SETUP ───────────────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
-    format='[%(asctime)s] [%(levelname)s] %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
-    stream=sys.stderr
+    format="[%(asctime)s] %(levelname)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    stream=sys.stderr,
 )
 logger = logging.getLogger(__name__)
 
-# ── DEVICE SETUP ───────────────────────────────────────────────────────────────
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-logger.info(f"Using device: {DEVICE}")
-
-
-# ── HELPER TO LOAD ALL TABNET FOLDS + THEIR SCALERS ────────────────────────────
-class TabNetFoldEnsemble:
-    """
-    Wraps K-fold TabNet models plus their StandardScalers so that predict()
-    returns inverse-transformed outputs on the same scale as the original target.
-    """
-    def __init__(self, tabnet_dir: Path):
-        import torch  # ensure torch is available here
-        fold_dirs = sorted(
-            d for d in tabnet_dir.iterdir()
-            if d.is_dir() and d.name.startswith("fold")
-        )
-        self.models = []
-        self.scalers = []
-        for fd in fold_dirs:
-            mz = fd / f"tabnet_{fd.name}.zip"
-            if not mz.exists():
-                raise FileNotFoundError(f"Expected TabNet zip at {mz}")
-            m = TabNetRegressor()
-            # load onto GPU if available
-            m.load_model(str(mz), device_name='cuda' if torch.cuda.is_available() else 'cpu')
-            self.models.append(m)
-
-            sp = fd / f"scaler_{fd.name}.pkl"
-            if not sp.exists():
-                raise FileNotFoundError(f"Expected scaler pickle at {sp}")
-            s = joblib.load(sp)
-            self.scalers.append(s)
-
-    def predict(self, X_fe: np.ndarray) -> np.ndarray:
-        preds = []
-        for model, scaler in zip(self.models, self.scalers):
-            p_scaled = model.predict(X_fe).ravel()
-            p = scaler.inverse_transform(p_scaled.reshape(-1, 1)).ravel()
-            preds.append(p)
-        return np.mean(preds, axis=0)
-
-
-# ── WEIGHTED ENSEMBLE ──────────────────────────────────────────────────────────
+# ── MUST match the training-time definition exactly ─────────────────────────────
 class WeightedEnsemble:
     """
-    Wraps models supporting .predict(...) to return a weighted average of predictions.
+    Wraps models supporting .predict(X) to return a weighted average of predictions.
     """
     def __init__(self, models, weights):
         self.models = models
-        self.model_names = []
-        for m in models:
-            if isinstance(m, CatBoostRegressor):
-                self.model_names.append("CatBoost")
-            elif isinstance(m, (TabNetRegressor, TabNetFoldEnsemble)):
-                self.model_names.append("TabNet")
-            else:
-                self.model_names.append("TabPFN")
         w = np.array(weights, dtype=float)
         self.weights = w / w.sum()
 
-    def predict(self, X: pd.DataFrame) -> np.ndarray:
-        # engineer features once (for CatBoost & TabNet)
-        X_fe, _ = engineer_features(X, X.copy())
-        X_np = X_fe.values
-        n = X.shape[0]
-
-        pred_list = []
-        for m in self.models:
-            if isinstance(m, (CatBoostRegressor, TabNetRegressor, TabNetFoldEnsemble)):
-                inp = X_np
-            else:
-                # assume PyTorch-based model
-                tensor = torch.from_numpy(X.values.astype(np.float32)).to(DEVICE)
-                inp = tensor
-            raw = m.predict(inp) if not hasattr(m, "to") else m.predict(inp)
-            # if a torch model returned a tensor, convert to numpy
-            if isinstance(raw, torch.Tensor):
-                arr = raw.detach().cpu().numpy().ravel()
-            else:
-                arr = np.asarray(raw).ravel()
-            if arr.shape[0] != n:
-                raise ValueError(f"{type(m).__name__} returned {arr.shape[0]} preds; expected {n}")
-            pred_list.append(arr)
-
-        mat = np.vstack(pred_list)          # (n_models, n_samples)
-        ens = self.weights.dot(mat)         # (n_samples,)
-
-        for i in range(0, n, 100):
-            parts = [f"{name}={mat[j,i]:.4f}" for j, name in enumerate(self.model_names)]
-            parts.append(f"Ensemble={ens[i]:.4f}")
-            logger.info(f"Sample {i}: " + ", ".join(parts))
-        return ens
-
-
-# ── MODEL LOADING ─────────────────────────────────────────────────────────────
-def load_model(path: Path):
-    """
-    Given a Path, either:
-      - return TabNetFoldEnsemble(path) if it's the tabnet/ directory
-      - load joblibs, torch .pt/.pth/.pkl, or single .zip onto the correct device
-    """
-    if path.is_dir() and any(path.glob("fold*/tabnet_fold*.zip")):
-        return TabNetFoldEnsemble(path)
-
-    ext = path.suffix.lower()
-
-    if ext in {'.pkl', '.pt', '.pth'}:
-        # torch checkpoint — load and map to GPU if available
-        model = torch.load(str(path), map_location=DEVICE, weights_only=False)
-        # if model supports .to(), move it explicitly
-        if hasattr(model, "to"):
-            model.to(DEVICE)
-        return model
-
-    if ext == '.joblib':
-        return joblib.load(path)
-
-    if ext == '.zip':
-        m = TabNetRegressor()
-        m.load_model(str(path), device_name='cuda' if torch.cuda.is_available() else 'cpu')
-        return m
-
-    raise ValueError(f"Cannot load model from {path!r}")
-
-
-def save_predictions(y_pred: np.ndarray, out_path: Path):
-    pd.DataFrame({'y_pred': y_pred}).to_csv(out_path, index=False)
-
+    def predict(self, X):
+        preds = [m.predict(X) for m in self.models]
+        return np.tensordot(self.weights, preds, axes=[0,0])
 
 def main():
-    parser = argparse.ArgumentParser(description="Predict with weighted ensemble")
-    parser.add_argument("-d", "--dataset",   required=True, help="Path to dataset root")
-    parser.add_argument("-m", "--model-file",required=True, help="Path to final_model.pkl")
-    parser.add_argument("-f", "--fold",      type=int, default=None,
-                        help="Fold number (if using simulated folds)")
-    parser.add_argument("-o", "--output",    required=True, help="CSV path for y_pred")
-    args = parser.parse_args()
+    p = argparse.ArgumentParser(description="Predict using the trained ensemble model")
+    p.add_argument("--dataset",    required=True,
+                   help="Name of dataset (folder under data/) to load")
+    p.add_argument("--fold",       type=int, default=None,
+                   help="Fold number for get_test_data (optional)")
+    p.add_argument("--model-dir",  required=True,
+                   help="Directory containing final_model.pkl and related artifacts")
+    p.add_argument("--output",     default="ensemble_predictions.csv",
+                   help="CSV file to save ensemble predictions")
+    args = p.parse_args()
 
-    logger.info(f"Loading X_test (fold={args.fold}) from {args.dataset}")
-    X_test = get_test_data(str(args.dataset), fold=args.fold)
+    # 1. Load ensemble
+    model_dir = Path(args.model_dir)
+    ensemble_path = model_dir / "final_model.pkl"
+    if not ensemble_path.exists():
+        logger.error("Ensemble model not found at %s", ensemble_path)
+        sys.exit(1)
 
-    logger.info(f"Loading ensemble from {args.model_file}")
-    ensemble = load_model(Path(args.model_file))
-    # reconstruct model_names if missing
-    ensemble.model_names = WeightedEnsemble(ensemble.models, []).model_names
+    # Now that WeightedEnsemble is defined in __main__, pickle.load will succeed
+    with open(ensemble_path, "rb") as f:
+        ensemble: WeightedEnsemble = pickle.load(f)
+    models = ensemble.models
+    weights = ensemble.weights
+    logger.info("Loaded ensemble with %d models", len(models))
 
-    logger.info("Computing predictions...")
-    y_pred = ensemble.predict(X_test)
+    # 2. Load full training data for feature engineering
+    try:
+        X_train_full, _ = load_only_train_for_dataset(args.dataset)
+        logger.info("Loaded full training data: %d samples, %d features",
+                    X_train_full.shape[0], X_train_full.shape[1])
+    except Exception as e:
+        logger.error("Failed to load training data: %s", e)
+        sys.exit(1)
 
-    logger.info(f"Saving predictions to {args.output}")
-    save_predictions(y_pred, Path(args.output))
-    print(f"Saved predictions to: {args.output}", file=sys.stdout)
+    # 3. Load test data via data layer
+    try:
+        X_test_raw = get_test_data(args.dataset, fold=args.fold)
+        logger.info("Loaded test data: %d samples, %d features",
+                    X_test_raw.shape[0], X_test_raw.shape[1])
+    except Exception as e:
+        logger.error("Failed to load test data: %s", e)
+        sys.exit(1)
 
+    # 4. Basic imputation and outlier capping
+    X_test = X_test_raw.copy()
+    # Impute missing
+    for col in X_train_full.columns:
+        if X_test[col].isna().any():
+            if pd.api.types.is_numeric_dtype(X_train_full[col]):
+                fill = X_train_full[col].median()
+            else:
+                fill = X_train_full[col].mode().iloc[0]
+            X_test[col].fillna(fill, inplace=True)
+    # Cap outliers
+    for col in X_train_full.select_dtypes(include=[np.number]).columns:
+        lo, hi = X_train_full[col].quantile(0.01), X_train_full[col].quantile(0.99)
+        X_test[col] = X_test[col].clip(lo, hi)
 
-if __name__ == '__main__':
+    # 5. Feature engineering for tree-based model
+    try:
+        _, X_test_fe = engineer_features(X_train_full, X_test.copy())
+        logger.info("Engineered tree-based features: %d cols", X_test_fe.shape[1])
+    except Exception as e:
+        logger.error("Feature engineering failed: %s", e)
+        sys.exit(1)
+
+    # 6. Prepare numpy array for TabNet/TabPFN
+    X_test_np = X_test.astype(np.float32).values
+
+    # 7. Generate per-model predictions
+    preds = []
+    for i, m in enumerate(models):
+        if i == 0:
+            # TabPFN: raw processed frame
+            try:
+                p_i = m.predict(X_test)
+            except:
+                p_i = m.predict(X_test_np)
+        elif i == 1:
+            # Tree-based: engineered features
+            try:
+                p_i = m.predict(X_test_fe)
+            except:
+                p_i = m.predict(X_test_fe.values)
+        elif i == 2:
+            # TabNet: numpy + inverse-scale
+            raw = m.predict(X_test_np).ravel()
+            # locate a scaler if present
+            scaler = None
+            s_files = list(model_dir.rglob("scaler_fold*.pkl"))
+            if s_files:
+                scaler = joblib.load(s_files[0])
+            p_i = scaler.inverse_transform(raw.reshape(-1,1)).ravel() if scaler else raw
+        else:
+            # fallback
+            try:
+                p_i = m.predict(X_test)
+            except:
+                p_i = m.predict(X_test_np)
+        preds.append(np.array(p_i).ravel())
+        logger.info("Model %d predicted %d values", i, len(preds[-1]))
+
+    # 8. Combine ensemble
+    P = np.vstack(preds)
+    y_ens = np.tensordot(weights, P, axes=[0,0])
+    logger.info("Combined predictions into ensemble of length %d", y_ens.shape[0])
+
+    # 9. Save
+    out_df = pd.DataFrame({"prediction": y_ens})
+    out_df.to_csv(args.output, index=False)
+    logger.info("Saved predictions to %s", args.output)
+
+if __name__ == "__main__":
     main()

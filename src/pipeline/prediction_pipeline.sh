@@ -22,13 +22,13 @@ print("GPU count:", torch.cuda.device_count())
 print("GPU name :", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "n/a")
 PY
 
-export DATASET_DIR="$PWD/data/exam_dataset"
-export MODEL_DIR="$PWD/modelsFinal"
+export DATASET_DIR="$PWD/data/yprop_4_1"
+export MODEL_DIR="$PWD/modelsFinal-YProp"
 
 # run training (option A: direct script invocation)
 cd src/pipeline
 python predict_with_final_model.py \
   --dataset $DATASET_DIR \
-  --model-file $MODEL_DIR/final_model.pkl \
-  --fold 1 \
+  --model-dir $MODEL_DIR \
+  --fold 11 \
   --output $MODEL_DIR/y_pred.csv
