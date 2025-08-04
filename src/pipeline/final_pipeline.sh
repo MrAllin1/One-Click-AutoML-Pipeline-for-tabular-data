@@ -11,7 +11,7 @@
 module load cuda/11.7
 
 # activate your env
-cd /work/dlclarge2/alidemaa-dl_lab/automl/automl-exam-ss25-tabular-freiburg-template
+cd /work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template
 source automl-tabular-env/bin/activate
 
 # sanity‑check

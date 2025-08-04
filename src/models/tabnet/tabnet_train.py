@@ -12,9 +12,48 @@ from pytorch_tabnet.tab_model import TabNetRegressor
 from . import config
 
 def to_numpy_float32(x):
+    """
+    Robustly convert x to a float32 numpy array.
+    Special-case: if DataFrame has a 'color' column (e.g., wine color), one-hot encode it.
+    Other non-numeric columns are coerced to numeric; missing values are imputed.
+    """
+    def _clean_df(df: pd.DataFrame) -> pd.DataFrame:
+        df = df.copy()
+
+        # one-hot encode wine color if present
+        if "color" in df.columns:
+            # you can also accept "colour" if needed; adapt here if dataset uses British spelling
+            dummies = pd.get_dummies(df["color"], prefix="color", drop_first=True, dummy_na=False)
+            df = df.drop(columns=["color"]).join(dummies)
+
+        # Coerce all remaining columns to numeric
+        for col in df.columns:
+            if not pd.api.types.is_numeric_dtype(df[col]):
+                coerced = pd.to_numeric(df[col], errors="coerce")
+                df[col] = coerced
+
+        # Simple imputation: forward fill, backfill, then zero fallback
+        if df.isna().any().any():
+            df = df.fillna(method="ffill").fillna(method="bfill").fillna(0)
+
+        return df
+
     if isinstance(x, (pd.DataFrame, pd.Series)):
-        return x.astype(np.float32).values
-    return np.array(x).astype(np.float32)
+        try:
+            return x.astype(np.float32).values
+        except Exception:
+            if isinstance(x, pd.Series):
+                df = x.to_frame()
+            else:
+                df = x
+            cleaned = _clean_df(df)
+            # Final check: all numeric?
+            if not all(pd.api.types.is_numeric_dtype(cleaned[c]) for c in cleaned.columns):
+                bad = [c for c in cleaned.columns if not pd.api.types.is_numeric_dtype(cleaned[c])]
+                raise ValueError(f"Columns still non-numeric after cleaning: {bad}")
+            return cleaned.astype(np.float32).values
+    else:
+        return np.array(x).astype(np.float32)
 
 def objective(trial, X_train, y_train, X_val, y_val):
     params = {
