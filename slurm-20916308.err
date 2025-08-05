@@ -1,0 +1,171 @@
+cpu-bind=MASK - dlcgpu02, task  0  0 [1693698]: mask 0x32200000322000 set
+/var/spool/slurm/job20916308/slurm_script: line 11: module: command not found
+2025-08-04 15:58:29 [INFO] Using device: cuda
+2025-08-04 15:58:29 [INFO] Training TabPFN model...
+[I 2025-08-04 15:58:29,040] A new study created in memory with name: no-name-f8695c59-86b0-4830-9004-ca462cf24c11
+2025-08-04 15:58:29 [INFO] 🔍 Trial 0: n_bootstrap=14, sample_frac=0.89
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+[I 2025-08-04 16:07:43,362] Trial 0 finished with value: 0.9139806781701966 and parameters: {'n_bootstrap': 14, 'sample_frac': 0.8852142919229748}. Best is trial 0 with value: 0.9139806781701966.
+2025-08-04 16:07:43 [INFO] 🔍 Trial 1: n_bootstrap=18, sample_frac=0.78
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+[I 2025-08-04 16:18:27,042] Trial 1 finished with value: 0.9135658448510707 and parameters: {'n_bootstrap': 18, 'sample_frac': 0.779597545259111}. Best is trial 0 with value: 0.9139806781701966.
+2025-08-04 16:18:27 [INFO] 🔍 Trial 2: n_bootstrap=11, sample_frac=0.65
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+[I 2025-08-04 16:23:50,138] Trial 2 finished with value: 0.9114773510401298 and parameters: {'n_bootstrap': 11, 'sample_frac': 0.6467983561008608}. Best is trial 0 with value: 0.9139806781701966.
+2025-08-04 16:23:50 [INFO] 🔍 Trial 3: n_bootstrap=10, sample_frac=0.86
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+[I 2025-08-04 16:30:37,578] Trial 3 finished with value: 0.9126041066642504 and parameters: {'n_bootstrap': 10, 'sample_frac': 0.8598528437324806}. Best is trial 0 with value: 0.9139806781701966.
+2025-08-04 16:30:37 [INFO] 🔍 Trial 4: n_bootstrap=16, sample_frac=0.81
+[I 2025-08-04 16:40:47,709] Trial 4 finished with value: 0.9133414561387896 and parameters: {'n_bootstrap': 16, 'sample_frac': 0.8124217733388137}. Best is trial 0 with value: 0.9139806781701966.
+2025-08-04 16:40:47 [INFO] 🔍 Trial 5: n_bootstrap=10, sample_frac=0.89
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+2025-08-04 16:43:36 [INFO] ⏸️ Pruned trial 5 at step 4 (R²=0.9074)
+[I 2025-08-04 16:43:36,806] Trial 5 pruned. 
+2025-08-04 16:43:36 [INFO] 🔍 Trial 6: n_bootstrap=19, sample_frac=0.66
+2025-08-04 16:44:06 [INFO] ⏸️ Pruned trial 6 at step 1 (R²=0.8993)
+[I 2025-08-04 16:44:06,992] Trial 6 pruned. 
+2025-08-04 16:44:06 [INFO] 🔍 Trial 7: n_bootstrap=12, sample_frac=0.66
+2025-08-04 16:44:36 [INFO] ⏸️ Pruned trial 7 at step 1 (R²=0.8994)
+[I 2025-08-04 16:44:36,967] Trial 7 pruned. 
+2025-08-04 16:44:36 [INFO] 🔍 Trial 8: n_bootstrap=13, sample_frac=0.76
+2025-08-04 16:45:12 [INFO] ⏸️ Pruned trial 8 at step 1 (R²=0.9027)
+[I 2025-08-04 16:45:12,214] Trial 8 pruned. 
+2025-08-04 16:45:12 [INFO] 🔍 Trial 9: n_bootstrap=14, sample_frac=0.69
+2025-08-04 16:45:44 [INFO] ⏸️ Pruned trial 9 at step 1 (R²=0.8999)
+[I 2025-08-04 16:45:44,077] Trial 9 pruned. 
+2025-08-04 16:45:44 [INFO] 🔍 Trial 10: n_bootstrap=16, sample_frac=0.83
+2025-08-04 16:47:02 [INFO] ⏸️ Pruned trial 10 at step 2 (R²=0.9050)
+[I 2025-08-04 16:47:02,631] Trial 10 pruned. 
+2025-08-04 16:47:02 [INFO] 🔍 Trial 11: n_bootstrap=19, sample_frac=0.77
+2025-08-04 16:47:38 [INFO] ⏸️ Pruned trial 11 at step 1 (R²=0.9024)
+[I 2025-08-04 16:47:38,452] Trial 11 pruned. 
+2025-08-04 16:47:38 [INFO] 🔍 Trial 12: n_bootstrap=17, sample_frac=0.72
+2025-08-04 16:48:11 [INFO] ⏸️ Pruned trial 12 at step 1 (R²=0.8997)
+[I 2025-08-04 16:48:11,635] Trial 12 pruned. 
+2025-08-04 16:48:11 [INFO] 🔍 Trial 13: n_bootstrap=20, sample_frac=0.79
+2025-08-04 16:48:48 [INFO] ⏸️ Pruned trial 13 at step 1 (R²=0.9026)
+[I 2025-08-04 16:48:48,808] Trial 13 pruned. 
+2025-08-04 16:48:48 [INFO] 🔍 Trial 14: n_bootstrap=17, sample_frac=0.60
+2025-08-04 16:49:16 [INFO] ⏸️ Pruned trial 14 at step 1 (R²=0.9027)
+[I 2025-08-04 16:49:16,757] Trial 14 pruned. 
+2025-08-04 16:49:16 [INFO] 🔍 Trial 15: n_bootstrap=14, sample_frac=0.88
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+[I 2025-08-04 16:59:14,515] Trial 15 finished with value: 0.9139955289578835 and parameters: {'n_bootstrap': 14, 'sample_frac': 0.883742915992114}. Best is trial 15 with value: 0.9139955289578835.
+2025-08-04 16:59:14 [INFO] 🔍 Trial 16: n_bootstrap=14, sample_frac=0.90
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+2025-08-04 17:02:04 [INFO] ⏸️ Pruned trial 16 at step 4 (R²=0.9071)
+[I 2025-08-04 17:02:04,035] Trial 16 pruned. 
+2025-08-04 17:02:04 [INFO] 🔍 Trial 17: n_bootstrap=14, sample_frac=0.85
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+[I 2025-08-04 17:11:12,740] Trial 17 finished with value: 0.9137736744477365 and parameters: {'n_bootstrap': 14, 'sample_frac': 0.8541004060157665}. Best is trial 15 with value: 0.9139955289578835.
+2025-08-04 17:11:12 [INFO] 🔍 Trial 18: n_bootstrap=15, sample_frac=0.86
+2025-08-04 17:12:30 [INFO] ⏸️ Pruned trial 18 at step 2 (R²=0.9052)
+[I 2025-08-04 17:12:30,707] Trial 18 pruned. 
+2025-08-04 17:12:30 [INFO] 🔍 Trial 19: n_bootstrap=12, sample_frac=0.72
+2025-08-04 17:13:02 [INFO] ⏸️ Pruned trial 19 at step 1 (R²=0.8994)
+[I 2025-08-04 17:13:02,908] Trial 19 pruned. 
+2025-08-04 17:13:02 [INFO] 🔍 Trial 20: n_bootstrap=13, sample_frac=0.87
+2025-08-04 17:13:43 [INFO] ⏸️ Pruned trial 20 at step 1 (R²=0.9041)
+[I 2025-08-04 17:13:43,985] Trial 20 pruned. 
+2025-08-04 17:13:43 [INFO] 🔍 Trial 21: n_bootstrap=14, sample_frac=0.83
+2025-08-04 17:14:22 [INFO] ⏸️ Pruned trial 21 at step 1 (R²=0.9034)
+[I 2025-08-04 17:14:22,793] Trial 21 pruned. 
+2025-08-04 17:14:22 [INFO] 🔍 Trial 22: n_bootstrap=15, sample_frac=0.88
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+[I 2025-08-04 17:24:32,185] Trial 22 finished with value: 0.9138399335266121 and parameters: {'n_bootstrap': 15, 'sample_frac': 0.8805135587540488}. Best is trial 15 with value: 0.9139955289578835.
+2025-08-04 17:24:32 [INFO] 🔍 Trial 23: n_bootstrap=15, sample_frac=0.88
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/tabpfn/architectures/base/preprocessing.py:315: RuntimeWarning: overflow encountered in expm1
+  x_inv[pos] = np.expm1(np.log(x[pos] * lmbda + 1) / lmbda)
