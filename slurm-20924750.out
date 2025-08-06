@@ -1,0 +1,8 @@
+CUDA available: True
+GPU count: 1
+GPU name : NVIDIA GeForce RTX 2080 Ti
+Sample 0: TabPFN=5.620319, TabPFN=5.791436, TabNet=6.010878, Ensemble=5.803910
+Sample 100: TabPFN=5.035089, TabPFN=4.875661, TabNet=5.169860, Ensemble=5.020981
+Sample 200: TabPFN=5.226786, TabPFN=5.201478, TabNet=5.495226, Ensemble=5.302300
+Sample 300: TabPFN=6.163672, TabPFN=6.502463, TabNet=6.308005, Ensemble=6.329217
+Saved predictions to: /work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/modelsFinal-wine_quality_rona/y_pred.csv

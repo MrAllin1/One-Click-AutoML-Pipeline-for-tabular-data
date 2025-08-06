@@ -1,0 +1,9 @@
+CUDA available: True
+GPU count: 1
+GPU name : NVIDIA GeForce RTX 2080 Ti
+Sample 0: TabPFN=8.160920, TabPFN=8.155811, TabNet=8.304318, Ensemble=8.205117
+Sample 100: TabPFN=8.431671, TabPFN=8.456373, TabNet=8.365192, Ensemble=8.418774
+Sample 200: TabPFN=6.822891, TabPFN=6.826174, TabNet=7.158212, Ensemble=6.931417
+Sample 300: TabPFN=8.678759, TabPFN=8.674692, TabNet=8.686039, Ensemble=8.679708
+Sample 400: TabPFN=7.880234, TabPFN=7.877198, TabNet=7.959844, Ensemble=7.904702
+Saved predictions to: /work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/modelsFinal-brazilian_houses_rona/y_pred.csv

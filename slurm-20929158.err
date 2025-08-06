@@ -1,0 +1,29 @@
+cpu-bind=MASK - dlcgpu18, task  0  0 [1727717]: mask 0x3c0000003c0000 set
+/var/spool/slurm/job20929158/slurm_script: line 11: module: command not found
+2025-08-06 14:14:19 [INFO] Loading X_test (fold 1) from /work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/data/brazilian_houses
+2025-08-06 14:14:19 [INFO] Loading X_test for fold 1 of dataset: /work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/data/brazilian_houses
+2025-08-06 14:14:19 [INFO] Loaded full training data (4212 rows, 11 cols)
+2025-08-06 14:14:19 [INFO] Loading ensemble from /work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/modelsFinal-brazilian_houses_rona/final_model.pkl
+TBB Warning: The number of workers is currently limited to 7. The request for 63 workers is ignored. Further requests for more workers will be silently ignored until the limit changes.
+
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/pytorch_tabnet/abstract_model.py:82: UserWarning: Device used : cuda
+  warnings.warn(f"Device used : {self.device}")
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/pytorch_tabnet/abstract_model.py:82: UserWarning: Device used : cuda
+  warnings.warn(f"Device used : {self.device}")
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/pytorch_tabnet/abstract_model.py:82: UserWarning: Device used : cuda
+  warnings.warn(f"Device used : {self.device}")
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/pytorch_tabnet/abstract_model.py:82: UserWarning: Device used : cuda
+  warnings.warn(f"Device used : {self.device}")
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/pytorch_tabnet/abstract_model.py:82: UserWarning: Device used : cuda
+  warnings.warn(f"Device used : {self.device}")
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/pytorch_tabnet/abstract_model.py:82: UserWarning: Device used : cuda
+  warnings.warn(f"Device used : {self.device}")
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/pytorch_tabnet/abstract_model.py:82: UserWarning: Device used : cuda
+  warnings.warn(f"Device used : {self.device}")
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/pytorch_tabnet/abstract_model.py:82: UserWarning: Device used : cuda
+  warnings.warn(f"Device used : {self.device}")
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/pytorch_tabnet/abstract_model.py:82: UserWarning: Device used : cuda
+  warnings.warn(f"Device used : {self.device}")
+/work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/automl-tabular-env/lib/python3.10/site-packages/pytorch_tabnet/abstract_model.py:82: UserWarning: Device used : cuda
+  warnings.warn(f"Device used : {self.device}")
+2025-08-06 14:15:13 [INFO] Saving predictions to /work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/modelsFinal-brazilian_houses_rona/y_pred.csv
