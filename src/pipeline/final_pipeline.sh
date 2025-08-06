@@ -11,6 +11,7 @@
 module load cuda/11.7
 
 # activate your env
+# !replace this with your root directory 
 cd /work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template
 source automl-tabular-env/bin/activate
 
@@ -23,8 +24,8 @@ print("GPU name :", torch.cuda.get_device_name(0) if torch.cuda.is_available() e
 PY
 
 # set paths for training and prediction
-export DATASET_DIR="$PWD/data/superconductivity"
-export MODEL_DIR="$PWD/modelsFinal-superconductivity"
+export DATASET_DIR="$PWD/data/exam_dataset"
+export MODEL_DIR="$PWD/modelsFinal-pipeline-run"
 
 # --------------------
 # STEP 1: TRAIN MODEL
