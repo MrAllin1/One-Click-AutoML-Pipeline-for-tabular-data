@@ -23,8 +23,8 @@ print("GPU name :", torch.cuda.get_device_name(0) if torch.cuda.is_available() e
 PY
 
 # set paths for training and prediction
-export DATASET_DIR="$PWD/data/superconductivity"
-export MODEL_DIR="$PWD/modelsFinal-superconductivity"
+export DATASET_DIR="$PWD/data/exam_dataset"
+export MODEL_DIR="$PWD/modelsFinal-exam-reproduced"
 
 # --------------------
 # STEP 1: TRAIN MODEL
