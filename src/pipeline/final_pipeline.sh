@@ -12,7 +12,7 @@ module load cuda/11.7
 
 # activate your env
 # !replace this with your root directory 
-cd /work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template
+cd /work/dlclarge2/alidemaa-dl_lab/automl-final-test/automl-exam-ss25-tabular-autokss
 source automl-tabular-env/bin/activate
 
 # sanity-check
@@ -30,6 +30,7 @@ export MODEL_DIR="$PWD/modelsFinal-pipeline-run"
 # --------------------
 # STEP 1: TRAIN MODEL
 # --------------------
+export PYTHONPATH="$PWD/src:$PYTHONPATH"
 cd src/pipeline
 python train_model_sequentionaly.py \
     --dataset "$DATASET_DIR" \

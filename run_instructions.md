@@ -8,7 +8,7 @@
     source automl-tabular-env/bin/activate
     ```
 
-    *(If you use a different environment name, update line 15 of the script accordingly.)*
+    *(If you use a different environment name, update line 16 of the script accordingly.)*
     *(Make sure to set up the environment into the root directory of the project)*
 
 3. **Install the dependencies**:
@@ -17,7 +17,7 @@
     ```
 
 4. **Update the script**:
-   - Change the path on **line 14** of the script to point to your project's root directory.
+   - Change the path on **line 15** of the script(src/pipeline/final_pipeline.sh) to point to your project's root directory.
 
 5. **Run the pipeline script** from the project root:
     ```
