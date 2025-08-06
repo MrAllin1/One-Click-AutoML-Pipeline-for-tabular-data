@@ -23,7 +23,7 @@ print("GPU name :", torch.cuda.get_device_name(0) if torch.cuda.is_available() e
 PY
 
 export DATASET_DIR="$PWD/data/exam_dataset"
-export MODEL_DIR="$PWD/modelsFinal-exam-reproduced"
+export MODEL_DIR="$PWD/modelsFinal-exam"
 
 # run training (option A: direct script invocation)
 cd src/pipeline
