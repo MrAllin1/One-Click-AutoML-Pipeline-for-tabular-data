@@ -1,0 +1,32 @@
+Tree based methods have been SOTA for tables for a very long time. 
+TabPFN works super well on data <10k instances, but tree based models still are the go to for certain cases
+
+Famous tree based methods:
+XGBoost, LightGBM, CatBoost
+
+XGBoost - still needs one-hot or target encoding for categoricals, adding boiler-plate and usually 
+under-performing CatBoost on mixed data at this scale we have in the project.
+this is why we will not use it in our case
+
+LightGBM - Very strong on mostly-numeric data (like Superconductivity and YProp in our case). 
+Has integer-encoded categorical support (category dtype)
+
+CatBoost - SOTA when >25% real categoricals (like in Brazilian Houses and Bike Sharing)
+Offers native categorical support - no encoder is needed
+
+
+The idea in run_tree_pipeline.py is choosing automatically between LightGBM GBDT and CatBoost depending 
+on how many categorical columns the data contain.
+
+The script will
+1.	infer column types, cast low-cardinality ints/strings to category
+2.	pick CatBoost if ≥30% of the columns are categorical, otherwise LightGBM
+3.	hyper-tune with Optuna (<60 trials ≈ a few minutes) using 5-fold CV
+4.	save the trained model + meta-data (columns, categorical_cols, best params) into <dataset>/models/<algo>_split<i>.pkl
+5.	print the R² on the provided test split (y_test.parquet) so you can keep track of progress
+
+Ideas on ensambling:
+
+Single strongest model   trains one LightGBM on all labelled rows and saves it (add a joblib.dump).	Fast inference, one file.
+Bagging (average predictions)	+0.01–0.02 R² boost, zero extra training.
+Stacking (best accuracy)	trains a tiny Ridge meta-model on out-of-split preds and writes meta_ridge.pkl.	Usually the biggest gain (+0.02–0.03 R²).

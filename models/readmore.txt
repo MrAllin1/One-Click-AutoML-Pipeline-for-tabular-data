@@ -1,0 +1,2 @@
+This directory contains the TensorBoard logs and related artifacts produced by our pipeline runs on various datasets.
+Because Git LFS isn’t supported in forked repositories, the accompanying .pkl files are not included here.

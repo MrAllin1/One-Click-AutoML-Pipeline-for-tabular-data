@@ -1,0 +1,14 @@
+CUDA available: True
+GPU count: 1
+GPU name : NVIDIA GeForce RTX 2080 Ti
+Sample 0: TabPFN=88.302666, TabPFN=86.286001, TabNet=69.288956, Ensemble=81.420430
+Sample 100: TabPFN=81.983643, TabPFN=80.938183, TabNet=64.915642, Ensemble=76.065047
+Sample 200: TabPFN=63.426445, TabPFN=48.719708, TabNet=51.845009, Ensemble=54.663680
+Sample 300: TabPFN=17.942387, TabPFN=16.700288, TabNet=15.312380, Ensemble=16.663805
+Sample 400: TabPFN=3.357447, TabPFN=3.067579, TabNet=4.787951, Ensemble=3.725484
+Sample 500: TabPFN=65.444931, TabPFN=67.510426, TabNet=53.064960, Ensemble=62.109579
+Sample 600: TabPFN=81.385681, TabPFN=79.981933, TabNet=74.030014, Ensemble=78.511746
+Sample 700: TabPFN=83.307693, TabPFN=83.462014, TabNet=75.240593, Ensemble=80.730201
+Sample 800: TabPFN=5.677619, TabPFN=4.764722, TabNet=3.884588, Ensemble=4.783524
+Sample 900: TabPFN=6.933422, TabPFN=7.200587, TabNet=6.835494, Ensemble=6.992098
+Saved predictions to: /work/dlclarge2/latifajr-dl_lab_project/autoML/automl-exam-ss25-tabular-freiburg-template/modelsFinal-superconductivity/y_pred.csv

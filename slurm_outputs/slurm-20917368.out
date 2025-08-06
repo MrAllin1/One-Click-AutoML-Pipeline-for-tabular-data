@@ -1,0 +1,12 @@
+CUDA available: True
+GPU count: 1
+GPU name : NVIDIA GeForce RTX 2080 Ti
+Sample 0: TabPFN=0.921643, Tree=0.918411, TabNet=0.930033, Ensemble=0.923012
+Sample 100: TabPFN=0.907412, Tree=0.906510, TabNet=0.911833, Ensemble=0.908444
+Sample 200: TabPFN=0.917931, Tree=0.915915, TabNet=0.923994, Ensemble=0.919045
+Sample 300: TabPFN=0.918323, Tree=0.912124, TabNet=0.915705, Ensemble=0.915099
+Sample 400: TabPFN=0.934540, Tree=0.939793, TabNet=0.935736, Ensemble=0.936952
+Sample 500: TabPFN=0.917234, Tree=0.921054, TabNet=0.916571, Ensemble=0.918509
+Sample 600: TabPFN=0.918829, Tree=0.917735, TabNet=0.919709, Ensemble=0.918680
+Sample 700: TabPFN=0.919417, Tree=0.926725, TabNet=0.924504, Ensemble=0.923843
+Saved predictions to: /work/dlclarge2/alidemaa-dl_lab/automl/automl-exam-ss25-tabular-freiburg-template/modelsFinal-YProp/y_pred.csv

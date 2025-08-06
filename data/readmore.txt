@@ -1,0 +1,65 @@
+Bike Sharing
+epochs: 10
+train data for each epoch: 7k
+test data for each epoch: 780
+data instance examples:
+{"season":"1","year":"1","month":12,"hour":21,"holiday":"0","workingday":"1","weather":"2","temp":9.84,"feel_temp":11.365,"humidity":0.6,"windspeed":16.997899999999998}
+{"count":58}
+
+Brazilian Houses
+epochs: 10
+train data for each epoch: 4.3k
+test data for each epoch: 480
+data instance examples:
+{"city":"1","area":100,"rooms":2,"bathroom":1,"parking_spaces":0,"animal":"0","furniture":"1","hoa_(BRL)":550,"rent_amount_(BRL)":900,"property_tax_(BRL)":61,"fire_insurance_(BRL)":12}
+{"total_(BRL)":7.329093736246592}
+
+Superconductivity
+epochs: 10
+train data for each epoch: 8.6k
+test data for each epoch: 950
+data instance examples:
+{"number_of_elements":4,"mean_atomic_mass":76.4445625,"wtd_mean_atomic_mass":51.6044547828114,"gmean_atomic_mass":59.3566724745425,"wtd_gmean_atomic_mass":35.2140956603323,"entropy_atomic_mass":1.1995407452483,"wtd_entropy_atomic_mass":1.29031304422968,"range_atomic_mass":121.3276,"wtd_range_atomic_mass":14.4337671924781,"std_atomic_mass":43.8233541228786,"wtd_std_atomic_mass":44.2724430069727,"mean_fie":794,"wtd_mean_fie":1000.47275623592,"gmean_fie":741.629348855485,"wtd_gmean_fie":934.349686856183,"entropy_fie":1.31500430814302,"wtd_entropy_fie":0.897696838290973,"range_fie":810.6,"wtd_range_fie":653.064255186883,"std_fie":311.743492313793,"wtd_std_fie":342.70036436806,"mean_atomic_radius":164.5,"wtd_mean_atomic_radius":115.215789882664,"gmean_atomic_radius":139.000513752081,"wtd_gmean_atomic_radius":90.2576999514232,"entropy_atomic_radius":1.25670056650299,"wtd_entropy_atomic_radius":1.33907981125969,"range_atomic_radius":205,"wtd_range_atomic_radius":22.8455979485586,"std_atomic_radius":77.5258021564434,"wtd_std_atomic_radius":79.3513125218172,"mean_Density":4235.85725,"wtd_mean_Density":2982.5018106302,"gmean_Density":669.556587809389,"wtd_gmean_Density":68.9852790266321,"entropy_Density":1.01540712310099,"wtd_entropy_Density":0.812761814566553,"range_Density":8958.571,"wtd_range_Density":2087.97763610226,"std_Density":3194.93894591629,"wtd_std_Density":3645.34222319912,"mean_ElectronAffinity":77.2375,"wtd_mean_ElectronAffinity":108.829940166291,"gmean_ElectronAffinity":53.5279646494387,"wtd_gmean_ElectronAffinity":86.101134663719,"entropy_ElectronAffinity":1.10518217403612,"wtd_entropy_ElectronAffinity":0.768190600025534,"range_ElectronAffinity":127.05,"wtd_range_ElectronAffinity":73.6601523039863,"std_ElectronAffinity":54.8307552268797,"wtd_std_ElectronAffinity":49.5816738210723,"mean_FusionHeat":8.1805,"wtd_mean_FusionHeat":5.30149335612713,"gmean_FusionHeat":4.03556899860879,"wtd_gmean_FusionHeat":1.36157898227871,"entropy_FusionHeat":1.11209819664271,"wtd_entropy_FusionHeat":1.04175568924456,"range_FusionHeat":12.878,"wtd_range_FusionHeat":2.93535488382936,"std_FusionHeat":4.9481552875794,"wtd_std_FusionHeat":5.65428891734646,"mean_ThermalConductivity":108.756645,"wtd_mean_ThermalConductivity":97.379950114228,"gmean_ThermalConductivity":7.55238461047956,"wtd_gmean_ThermalConductivity":1.13860027119932,"entropy_ThermalConductivity":0.336261915781173,"wtd_entropy_ThermalConductivity":0.203124258879099,"range_ThermalConductivity":399.97342,"wtd_range_ThermalConductivity":93.2331511368405,"std_ThermalConductivity":168.301046773239,"wtd_std_ThermalConductivity":166.999675895694,"mean_Valence":2.25,"wtd_mean_Valence":2.07770611547129,"gmean_Valence":2.21336383940064,"wtd_gmean_Valence":2.06401744386829,"entropy_Valence":1.36892236074022,"wtd_entropy_Valence":1.20711922024129,"range_Valence":1,"wtd_range_Valence":0.834408267930686,"std_Valence":0.433012701892219,"wtd_std_Valence":0.267708563721168}
+{"critical_temp":90}
+
+Wine Quality
+epochs: 10
+train data for each epoch: 4k
+test data for each epoch: 440
+data instance examples:
+{"fixed_acidity":6.4,"volatile_acidity":0.29,"citric_acid":0.21,"residual_sugar":9.65,"chlorides":0.041,"free_sulfur_dioxide":36,"total_sulfur_dioxide":119,"density":0.99334,"pH":2.99,"sulphates":0.34,"alcohol":10.9333333333333,"wine_color":"white"}
+{"median_wine_quality":8}
+
+Yprop_4_1
+epochs: 10
+train data for each epoch: 7.2k
+test data for each epoch: 800
+data instance examples:
+{"oz1":0.999958,"oz2":0.164706,"oz3":1,"oz4":0.996741,"oz5":0.066667,"oz6":0.057143,"oz9":0,"oz10":0,"oz11":0,"oz12":0.076923,"oz13":0.090909,"oz31":0,"oz40":"0","oz42":"0","oz46":"0","oz50":"0","oz69":"0","oz71":"0","oz73":"0","oz79":"0","oz83":0,"oz87":0,"oz96":"0","oz100":"0","oz107":"0","oz108":"0","oz111":"0","oz112":"0","oz113":"0","oz115":"0","oz124":0,"oz125":0.178571,"oz126":0.066667,"oz127":0,"oz128":0,"oz131":0.1,"oz133":0,"oz135":"0","oz149":0.076923,"oz150":0,"oz151":0.142857,"oz165":0,"oz171":0,"oz172":0.211538,"oz173":0,"oz175":0.076923,"oz176":0,"oz177":0.083333,"oz178":0,"oz181":0,"oz183":0.25,"oz185":0.083333,"oz197":0.1,"oz206":"0","oz222":"0","oz234":"0","oz246":0.542588,"oz247":0.037405,"oz248":0.333,"oz249":0.192251,"oz250":0.214807,"oz251":0.519795}
+{"oz252":0.930352}
+
+Bike Sharing: likely benefits from datetime feature engineering and a robust model that can capture 
+non-linear demand patterns (perhaps an ensemble of LightGBM and a neural net handling seasonality).
+
+Brazilian Houses: a typical housing price regression – capturing location effects (categorical) and 
+numerical features (size, rooms) will be key; CatBoost might shine due to categorical handling.
+
+Superconductivity: a scientific dataset with continuous features (material properties) – could benefit 
+from neural nets to model complex interactions, and TabPFN might catch on quick if the data volume is small.
+
+Wine Quality: relatively small (~5k) and an easier task; even a single XGBoost might do well, but TabPFN 
+can probably ace it given it’s within its sweet spot
+
+Yprop_4_1: around 8k samples, multiple features – TabPFN or a tuned CatBoost/TabNet ensemble likely does 
+well. We note one reference saying this dataset is “hard” and XGBoost alone struggled; this implies we 
+might really need the extra mile (e.g. an ensemble or a novel approach) – a perfect use case for including
+TabPFN’s learned prior knowledge and an ensemble to capture any linear trends that TabPFN might not.
+
+Reference performance
+Dataset	                Test performance
+bike_sharing_demand	    0.9457
+brazilian_houses	    0.9896
+superconductivity	    0.9311
+wine_quality	        0.4410
+yprop_4_1	            0.0778
+The scores listed are the R² values calculated using scikit-learn's metrics.r2_score.

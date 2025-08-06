@@ -1,0 +1,4 @@
+Exploratory analyses and prototyping notebooks.  
+- Ad-hoc EDA, visualization, and initial model experiments live here.  
+- Not part of the production pipeline—results here should be migrated into src/ when finalized.  
+- Name files with a numeric prefix to enforce execution order (e.g., 01-explore.ipynb).

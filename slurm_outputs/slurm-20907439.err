@@ -1,0 +1,24 @@
+cpu-bind=MASK - dlcgpu02, task  0  0 [3243191]: mask 0x3c0000003c00000 set
+/var/spool/slurm/job20907439/slurm_script: line 11: module: command not found
+2025-08-02 13:47:04 [INFO] Loading X_test for fold 1 of dataset: /work/dlclarge2/alidemaa-dl_lab/automl/automl-exam-ss25-tabular-freiburg-template/data/exam_dataset
+2025-08-02 13:47:04 [INFO] Loading X_test for fold 1 of dataset: /work/dlclarge2/alidemaa-dl_lab/automl/automl-exam-ss25-tabular-freiburg-template/data/exam_dataset
+2025-08-02 13:47:04 [WARNING] y_test not found at /work/dlclarge2/alidemaa-dl_lab/automl/automl-exam-ss25-tabular-freiburg-template/data/exam_dataset/1/y_test.parquet, returning empty DataFrame
+2025-08-02 13:47:04 [INFO] Loading ensemble model from: /work/dlclarge2/alidemaa-dl_lab/automl/automl-exam-ss25-tabular-freiburg-template/modelsFinal/final_model.pkl
+2025-08-02 13:47:08 [INFO] Computing predictions on X_test...
+TBB Warning: The number of workers is currently limited to 7. The request for 63 workers is ignored. Further requests for more workers will be silently ignored until the limit changes.
+
+2025-08-02 13:49:25 [INFO] Sample 0: TabPFN=672511.6875, CatBoost=687680.0990, TabNet=0.8163, Ensemble=453604.7509
+2025-08-02 13:49:25 [INFO] Sample 100: TabPFN=188806.0469, CatBoost=185673.8035, TabNet=-0.7715, Ensemble=124893.1192
+2025-08-02 13:49:25 [INFO] Sample 200: TabPFN=349519.3125, CatBoost=344902.0334, TabNet=-0.1888, Ensemble=231595.9327
+2025-08-02 13:49:25 [INFO] Sample 300: TabPFN=263848.6562, CatBoost=260246.9290, TabNet=-0.5186, Ensemble=174790.7485
+2025-08-02 13:49:25 [INFO] Sample 400: TabPFN=352001.6875, CatBoost=352791.3908, TabNet=-0.2286, Ensemble=235047.7138
+2025-08-02 13:49:25 [INFO] Sample 500: TabPFN=270133.0938, CatBoost=279521.3270, TabNet=-0.3913, Ensemble=183297.4171
+2025-08-02 13:49:25 [INFO] Sample 600: TabPFN=352466.7812, CatBoost=342775.2997, TabNet=-0.2322, Ensemble=231876.3752
+2025-08-02 13:49:25 [INFO] Sample 700: TabPFN=303428.1250, CatBoost=287632.4176, TabNet=-0.4110, Ensemble=197139.8312
+2025-08-02 13:49:25 [INFO] Sample 800: TabPFN=343867.4375, CatBoost=333204.8161, TabNet=-0.2317, Ensemble=225818.0193
+2025-08-02 13:49:25 [INFO] Sample 900: TabPFN=231538.5938, CatBoost=211558.9107, TabNet=-0.5792, Ensemble=147799.5877
+2025-08-02 13:49:25 [INFO] Sample 1000: TabPFN=765906.1875, CatBoost=757411.8374, TabNet=1.4808, Ensemble=508039.0907
+2025-08-02 13:49:25 [INFO] Sample 1100: TabPFN=266187.8750, CatBoost=285402.9499, TabNet=-0.5698, Ensemble=183930.0937
+2025-08-02 13:49:25 [INFO] Sample 1200: TabPFN=281790.8750, CatBoost=275487.9333, TabNet=-0.4653, Ensemble=185860.9763
+2025-08-02 13:49:25 [INFO] Sample 1300: TabPFN=270821.0625, CatBoost=274146.3258, TabNet=-0.4172, Ensemble=181742.3359
+2025-08-02 13:49:25 [INFO] Saving predictions to: /work/dlclarge2/alidemaa-dl_lab/automl/automl-exam-ss25-tabular-freiburg-template/modelsFinal/y_pred.csv
