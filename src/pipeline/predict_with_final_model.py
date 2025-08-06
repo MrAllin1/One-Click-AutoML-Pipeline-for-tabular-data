@@ -13,7 +13,7 @@ import logging
 import pickle                              # <— needed for unpickling
 import sys
 from pathlib import Path
-
+from tabpfn import TabPFNRegressor 
 import numpy as np
 import pandas as pd
 import joblib
@@ -108,10 +108,10 @@ def main():
     for m in ensemble.models:
         if isinstance(m, TabNetRegressor):
             names.append("TabNet")
-        elif isinstance(m, CatBoostRegressor):
-            names.append("Tree")
-        else:
+        elif isinstance(m, TabPFNRegressor):
             names.append("TabPFN")
+        else:
+            names.append("Tree")
 
     # 7) per-model predictions
     #    - TabPFN on raw X_test

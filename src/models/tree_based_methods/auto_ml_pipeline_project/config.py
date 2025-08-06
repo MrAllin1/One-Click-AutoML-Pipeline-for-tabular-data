@@ -4,7 +4,7 @@
 Global configuration parameters for the AutoML pipeline.
 """
 
-MAX_TRIALS = 150           # Optuna HPO trials 60 is the default
+MAX_TRIALS = 100           # Optuna HPO trials 60 is the default
 CV_FOLDS = 10              # Cross-validation folds
 RANDOM_SEED = 42          # Random seed for reproducibility
 GPU_SAMPLE_THRESHOLD = 1000  # Minimum rows to enable GPU training

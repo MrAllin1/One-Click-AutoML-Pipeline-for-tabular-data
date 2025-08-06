@@ -23,7 +23,7 @@ sys.path.insert(0, str(proj_root / "src"))
 from data.load import load_fold, get_available_folds, DATA_ROOT
 
 def main(test_size: float, random_state: int):
-    dataset = "yprop_4_1"
+    dataset = "superconductivity"
     ds_dir = DATA_ROOT / dataset
 
     # 1) Determine original folds (numeric < 11)
