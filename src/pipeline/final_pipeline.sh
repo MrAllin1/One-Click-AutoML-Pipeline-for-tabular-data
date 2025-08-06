@@ -41,5 +41,9 @@ python train_model_sequentionaly.py \
 python predict_with_final_model.py \
     --dataset "$DATASET_DIR" \
     --model-file "$MODEL_DIR/final_model.pkl" \
-    --fold 11 \
+    --fold 1 \
     --output "$MODEL_DIR/y_pred.csv"
+
+python make_predictions_npy.py \
+    "$MODEL_DIR" \
+    --output "$MODEL_DIR/predictions.npy"

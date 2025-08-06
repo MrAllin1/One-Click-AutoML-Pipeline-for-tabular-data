@@ -1,6 +1,2 @@
-This folder is supposed to contain the final models aka the serialized artifacts (.joblib, .pkl)
-
-
-python evaluate_r2.py \
-  --pred /work/dlclarge2/alidemaa-dl_lab/automl/automl-exam-ss25-tabular-freiburg-template/y_pred.csv \
-  --true /work/.../data/superconductivity/3/y_test.parquet
+This directory contains the TensorBoard logs and related artifacts produced by our pipeline runs on various datasets.
+Because Git LFS isn’t supported in forked repositories, the accompanying .pkl files are not included here.

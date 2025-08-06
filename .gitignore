@@ -9,7 +9,6 @@ data/superconductivity
 data/wine_quality
 data/yprop_4_1
 
-models/tabnet
 
 # TODO: add/edit your venv folder name here (if you use venv)
 automl-tabular-env
