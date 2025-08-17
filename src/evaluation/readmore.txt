@@ -1,3 +1,0 @@
-Model validation and metrics:  
-- evaluate.py → functions to compute accuracy, AUC, cross‐validation scores, etc.  
-- Place any plotting or comparison logic here (moved from notebooks once stable).
