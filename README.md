@@ -1,12 +1,23 @@
-This project is a ensemble based one-click AutoML Pipeline that does regression on any dataset with tabular data. 
-The way this pipeline works is best represented via the diagram below:
+# AutoML Pipeline
 
-![Main Pipeline Diagram](pipeline_diagram.png)
+## Overview  
+This project is an **ensemble-based one-click AutoML pipeline** that performs regression on any tabular dataset.  
 
-Results were really good and can be seen with the boxplots below:
+The workflow is best represented by the diagram below:  
 
-![Boxplot Diagrams](boxplot-diagram.png)
+![Main Pipeline Diagram](pipeline_diagram.png)  
 
-You can also view the full research poster here : [Research Poster](poster.pdf)
+Results were strong some examples can be seen here:  
 
-For instruction on how to run the pipeline check the run_instructions.md, also on src/utils you have a python script that downloads some popular tabular datasets which can be used for testing.
+![Boxplot Diagrams](boxplot-diagram.png)  
+
+---
+
+## Research Poster  
+You can also view the full research poster for more details here: [Research Poster](poster.pdf)  
+
+---
+
+## Details  
+For instructions on how to run the pipeline, see run_instructions.md 
+Additionally, in src/utils/ you’ll find a Python script that downloads popular tabular datasets for testing.  
